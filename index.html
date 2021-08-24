@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Language" content="en">
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chisel Midle</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        #popupTitle{
+            left: 276px;
+            top: 127px;
+            font-size: 11px;
+            color: #fff;
+            display: none;
+        }
+        #popupText{
+            left: 275px;
+            top: 155px;
+            font-size: 12px;
+            text-align: justify;
+            width: 290px;
+            resize: none;
+            display: none;
+        }
+        #popupBtn{
+            position: absolute;
+            background-color: rgb(122, 122, 122);
+            border: 2px solid rgb(122, 122, 122);
+            transition: border 0.3s ease-in;
+            cursor: pointer;
+            color: #fff;
+            padding: 2px;
+            border-radius: 5px;
+            letter-spacing: .5px;
+            left: 370px;
+            top: 265px;
+            font-size: 12px;
+            width: 100px;
+            display: none;
+        }
+        .interface-text{
+            position: absolute;
+            background-color: transparent;
+            border: none;
+            letter-spacing: .5px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <!--popup-->
+    <input type="text" id="popupTitle" value="Message" class="interface-text" readonly />
+    <textarea id="popupText" cols="30" rows="10" class="interface-text" readonly>
+    </textarea>
+    <input type="button" id="popupBtn" value="Ok" />
+    <!--JSON-->
+    <script src="./build/texts.json"></script>
+    <!--Main Script-->
+    <script src="./build/bundle.js"></script>
+</body>
+</html>
