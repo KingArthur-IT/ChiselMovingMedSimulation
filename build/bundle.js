@@ -42926,7 +42926,7 @@
 
 	//scene
 	let canvas, camera, scene, light, renderer,
-		chiselObj;
+		chiselObj, povitPoint, shiftObj;
 	//popup
 	let popupPlaneMesh,
 		popupBtn = document.getElementById('popupBtn');
@@ -42946,9 +42946,9 @@
 			chiselObj: 'chisel.obj',
 			chiselMtl: 'chisel.mtl',
 			scale: new Vector3(1.0, 1.0, 1.0),
-			position: new Vector3(0.0, 0.0, 0.0),
-			rotation: new Vector3(20 * Math.PI / 180.0,
-				0.0 * Math.PI / 180.0, 0.0)
+			position: new Vector3(-15.0, -5, 0.0),
+			rotation: new Vector3(15 * Math.PI / 180.0,
+					180.0 * Math.PI / 180.0, 0.0)
 		},
 	};
 
@@ -42961,7 +42961,7 @@
 			//scene and camera
 			scene = new Scene();
 			camera = new PerspectiveCamera(40.0, params.sceneWidth / params.sceneHeight, 0.1, 5000);
-			camera.position.set(0, 0, 100);
+			camera.position.set(0, 0, 40);
 			//light
 			light = new AmbientLight(0xffffff);
 			scene.add(light);
@@ -42977,7 +42977,10 @@
 				scene.background = texture;
 			});
 
-			
+			povitPoint = new Object3D();
+			shiftObj = new Object3D();
+			shiftObj.add(povitPoint);
+			scene.add(shiftObj);
 			//objects		
 			chiselObj = new Object3D();
 			let mtlLoader = new MTLLoader();
@@ -42991,12 +42994,18 @@
 				objLoader.setPath(objectsParams.modelPath);
 				objLoader.load(objectsParams.chisel.chiselObj, function (object) {
 					object.scale.copy(objectsParams.chisel.scale);
-					object.position.copy(objectsParams.chisel.position);
-					object.rotation.setFromVector3(objectsParams.chisel.rotation);
+					//object.position.copy(objectsParams.chisel.position);
+					//object.rotation.setFromVector3(objectsParams.chisel.rotation);
 					chiselObj.add(object);
-					scene.add(chiselObj);
+					//scene.add(chiselObj);
 				});
 			});
+
+			povitPoint.add(chiselObj);
+			shiftObj.position.set(-12, -5.5, 0);
+			chiselObj.rotation.y = 195.0 * Math.PI / 180.0;
+			chiselObj.rotation.x = 8.0 * Math.PI / 180.0;
+			chiselObj.rotation.z = 3.0 * Math.PI / 180.0;
 		
 			//popup
 			//createPopupPlane();
