@@ -1,5 +1,5 @@
 # 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
-# File Created: 20.08.2021 18:25:00
+# File Created: 25.08.2021 10:21:37
 
 mtllib chisel.mtl
 
@@ -49689,7 +49689,7 @@ vt 0.8931 0.7559 0.0000
 
 o chisel_body
 g chisel_body
-usemtl wire_000000000
+usemtl Material__64
 s off
 f 1/1/1 2/2/2 3/3/3 
 f 3/3/3 2/2/2 4/4/4 

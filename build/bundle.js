@@ -266,6 +266,8 @@
 
 	}
 
+	let _seed = 1234567;
+
 
 	const DEG2RAD = Math.PI / 180;
 	const RAD2DEG = 180 / Math.PI;
@@ -301,10 +303,115 @@
 
 	}
 
+	// Linear mapping from range <a1, a2> to range <b1, b2>
+	function mapLinear( x, a1, a2, b1, b2 ) {
+
+		return b1 + ( x - a1 ) * ( b2 - b1 ) / ( a2 - a1 );
+
+	}
+
+	// https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/inverse-lerp-a-super-useful-yet-often-overlooked-function-r5230/
+	function inverseLerp( x, y, value ) {
+
+		if ( x !== y ) {
+
+			return ( value - x ) / ( y - x );
+
+			 } else {
+
+			return 0;
+
+			 }
+
+	}
+
 	// https://en.wikipedia.org/wiki/Linear_interpolation
 	function lerp( x, y, t ) {
 
 		return ( 1 - t ) * x + t * y;
+
+	}
+
+	// http://www.rorydriscoll.com/2016/03/07/frame-rate-independent-damping-using-lerp/
+	function damp( x, y, lambda, dt ) {
+
+		return lerp( x, y, 1 - Math.exp( - lambda * dt ) );
+
+	}
+
+	// https://www.desmos.com/calculator/vcsjnyz7x4
+	function pingpong( x, length = 1 ) {
+
+		return length - Math.abs( euclideanModulo( x, length * 2 ) - length );
+
+	}
+
+	// http://en.wikipedia.org/wiki/Smoothstep
+	function smoothstep( x, min, max ) {
+
+		if ( x <= min ) return 0;
+		if ( x >= max ) return 1;
+
+		x = ( x - min ) / ( max - min );
+
+		return x * x * ( 3 - 2 * x );
+
+	}
+
+	function smootherstep( x, min, max ) {
+
+		if ( x <= min ) return 0;
+		if ( x >= max ) return 1;
+
+		x = ( x - min ) / ( max - min );
+
+		return x * x * x * ( x * ( x * 6 - 15 ) + 10 );
+
+	}
+
+	// Random integer from <low, high> interval
+	function randInt( low, high ) {
+
+		return low + Math.floor( Math.random() * ( high - low + 1 ) );
+
+	}
+
+	// Random float from <low, high> interval
+	function randFloat( low, high ) {
+
+		return low + Math.random() * ( high - low );
+
+	}
+
+	// Random float from <-range/2, range/2> interval
+	function randFloatSpread( range ) {
+
+		return range * ( 0.5 - Math.random() );
+
+	}
+
+	// Deterministic pseudo-random float in the interval [ 0, 1 ]
+	function seededRandom( s ) {
+
+		if ( s !== undefined ) _seed = s % 2147483647;
+
+		// Park-Miller algorithm
+
+		_seed = _seed * 16807 % 2147483647;
+
+		return ( _seed - 1 ) / 2147483646;
+
+	}
+
+	function degToRad( degrees ) {
+
+		return degrees * DEG2RAD;
+
+	}
+
+	function radToDeg( radians ) {
+
+		return radians * RAD2DEG;
 
 	}
 
@@ -314,11 +421,99 @@
 
 	}
 
+	function ceilPowerOfTwo( value ) {
+
+		return Math.pow( 2, Math.ceil( Math.log( value ) / Math.LN2 ) );
+
+	}
+
 	function floorPowerOfTwo( value ) {
 
 		return Math.pow( 2, Math.floor( Math.log( value ) / Math.LN2 ) );
 
 	}
+
+	function setQuaternionFromProperEuler( q, a, b, c, order ) {
+
+		// Intrinsic Proper Euler Angles - see https://en.wikipedia.org/wiki/Euler_angles
+
+		// rotations are applied to the axes in the order specified by 'order'
+		// rotation by angle 'a' is applied first, then by angle 'b', then by angle 'c'
+		// angles are in radians
+
+		const cos = Math.cos;
+		const sin = Math.sin;
+
+		const c2 = cos( b / 2 );
+		const s2 = sin( b / 2 );
+
+		const c13 = cos( ( a + c ) / 2 );
+		const s13 = sin( ( a + c ) / 2 );
+
+		const c1_3 = cos( ( a - c ) / 2 );
+		const s1_3 = sin( ( a - c ) / 2 );
+
+		const c3_1 = cos( ( c - a ) / 2 );
+		const s3_1 = sin( ( c - a ) / 2 );
+
+		switch ( order ) {
+
+			case 'XYX':
+				q.set( c2 * s13, s2 * c1_3, s2 * s1_3, c2 * c13 );
+				break;
+
+			case 'YZY':
+				q.set( s2 * s1_3, c2 * s13, s2 * c1_3, c2 * c13 );
+				break;
+
+			case 'ZXZ':
+				q.set( s2 * c1_3, s2 * s1_3, c2 * s13, c2 * c13 );
+				break;
+
+			case 'XZX':
+				q.set( c2 * s13, s2 * s3_1, s2 * c3_1, c2 * c13 );
+				break;
+
+			case 'YXY':
+				q.set( s2 * c3_1, c2 * s13, s2 * s3_1, c2 * c13 );
+				break;
+
+			case 'ZYZ':
+				q.set( s2 * s3_1, s2 * c3_1, c2 * s13, c2 * c13 );
+				break;
+
+			default:
+				console.warn( 'THREE.MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: ' + order );
+
+		}
+
+	}
+
+	var MathUtils = /*#__PURE__*/Object.freeze({
+		__proto__: null,
+		DEG2RAD: DEG2RAD,
+		RAD2DEG: RAD2DEG,
+		generateUUID: generateUUID,
+		clamp: clamp,
+		euclideanModulo: euclideanModulo,
+		mapLinear: mapLinear,
+		inverseLerp: inverseLerp,
+		lerp: lerp,
+		damp: damp,
+		pingpong: pingpong,
+		smoothstep: smoothstep,
+		smootherstep: smootherstep,
+		randInt: randInt,
+		randFloat: randFloat,
+		randFloatSpread: randFloatSpread,
+		seededRandom: seededRandom,
+		degToRad: degToRad,
+		radToDeg: radToDeg,
+		isPowerOfTwo: isPowerOfTwo,
+		ceilPowerOfTwo: ceilPowerOfTwo,
+		floorPowerOfTwo: floorPowerOfTwo,
+		setQuaternionFromProperEuler: setQuaternionFromProperEuler
+	});
 
 	class Vector2 {
 
@@ -9084,7 +9279,7 @@
 	const _m1 = /*@__PURE__*/ new Matrix4();
 	const _obj = /*@__PURE__*/ new Object3D();
 	const _offset = /*@__PURE__*/ new Vector3();
-	const _box$1 = /*@__PURE__*/ new Box3();
+	const _box$1$1 = /*@__PURE__*/ new Box3();
 	const _boxMorphTargets = /*@__PURE__*/ new Box3();
 	const _vector$8 = /*@__PURE__*/ new Vector3();
 
@@ -9389,20 +9584,20 @@
 					for ( let i = 0, il = morphAttributesPosition.length; i < il; i ++ ) {
 
 						const morphAttribute = morphAttributesPosition[ i ];
-						_box$1.setFromBufferAttribute( morphAttribute );
+						_box$1$1.setFromBufferAttribute( morphAttribute );
 
 						if ( this.morphTargetsRelative ) {
 
-							_vector$8.addVectors( this.boundingBox.min, _box$1.min );
+							_vector$8.addVectors( this.boundingBox.min, _box$1$1.min );
 							this.boundingBox.expandByPoint( _vector$8 );
 
-							_vector$8.addVectors( this.boundingBox.max, _box$1.max );
+							_vector$8.addVectors( this.boundingBox.max, _box$1$1.max );
 							this.boundingBox.expandByPoint( _vector$8 );
 
 						} else {
 
-							this.boundingBox.expandByPoint( _box$1.min );
-							this.boundingBox.expandByPoint( _box$1.max );
+							this.boundingBox.expandByPoint( _box$1$1.min );
+							this.boundingBox.expandByPoint( _box$1$1.max );
 
 						}
 
@@ -9451,7 +9646,7 @@
 
 				const center = this.boundingSphere.center;
 
-				_box$1.setFromBufferAttribute( position );
+				_box$1$1.setFromBufferAttribute( position );
 
 				// process morph attributes if present
 
@@ -9464,16 +9659,16 @@
 
 						if ( this.morphTargetsRelative ) {
 
-							_vector$8.addVectors( _box$1.min, _boxMorphTargets.min );
-							_box$1.expandByPoint( _vector$8 );
+							_vector$8.addVectors( _box$1$1.min, _boxMorphTargets.min );
+							_box$1$1.expandByPoint( _vector$8 );
 
-							_vector$8.addVectors( _box$1.max, _boxMorphTargets.max );
-							_box$1.expandByPoint( _vector$8 );
+							_vector$8.addVectors( _box$1$1.max, _boxMorphTargets.max );
+							_box$1$1.expandByPoint( _vector$8 );
 
 						} else {
 
-							_box$1.expandByPoint( _boxMorphTargets.min );
-							_box$1.expandByPoint( _boxMorphTargets.max );
+							_box$1$1.expandByPoint( _boxMorphTargets.min );
+							_box$1$1.expandByPoint( _boxMorphTargets.max );
 
 						}
 
@@ -9481,7 +9676,7 @@
 
 				}
 
-				_box$1.getCenter( center );
+				_box$1$1.getCenter( center );
 
 				// second, try to find a boundingSphere with a radius smaller than the
 				// boundingSphere of the boundingBox: sqrt(3) smaller in the best case
@@ -27885,8 +28080,8 @@
 
 	Line.prototype.isLine = true;
 
-	const _start = /*@__PURE__*/ new Vector3();
-	const _end = /*@__PURE__*/ new Vector3();
+	const _start$2 = /*@__PURE__*/ new Vector3();
+	const _end$2 = /*@__PURE__*/ new Vector3();
 
 	class LineSegments extends Line {
 
@@ -27913,11 +28108,11 @@
 
 					for ( let i = 0, l = positionAttribute.count; i < l; i += 2 ) {
 
-						_start.fromBufferAttribute( positionAttribute, i );
-						_end.fromBufferAttribute( positionAttribute, i + 1 );
+						_start$2.fromBufferAttribute( positionAttribute, i );
+						_end$2.fromBufferAttribute( positionAttribute, i + 1 );
 
 						lineDistances[ i ] = ( i === 0 ) ? 0 : lineDistances[ i - 1 ];
-						lineDistances[ i + 1 ] = lineDistances[ i ] + _start.distanceTo( _end );
+						lineDistances[ i + 1 ] = lineDistances[ i ] + _start$2.distanceTo( _end$2 );
 
 					}
 
@@ -28014,7 +28209,7 @@
 
 	const _inverseMatrix = /*@__PURE__*/ new Matrix4();
 	const _ray = /*@__PURE__*/ new Ray();
-	const _sphere = /*@__PURE__*/ new Sphere();
+	const _sphere$4 = /*@__PURE__*/ new Sphere();
 	const _position$2 = /*@__PURE__*/ new Vector3();
 
 	class Points extends Object3D {
@@ -28054,11 +28249,11 @@
 
 			if ( geometry.boundingSphere === null ) geometry.computeBoundingSphere();
 
-			_sphere.copy( geometry.boundingSphere );
-			_sphere.applyMatrix4( matrixWorld );
-			_sphere.radius += threshold;
+			_sphere$4.copy( geometry.boundingSphere );
+			_sphere$4.applyMatrix4( matrixWorld );
+			_sphere$4.radius += threshold;
 
-			if ( raycaster.ray.intersectsSphere( _sphere ) === false ) return;
+			if ( raycaster.ray.intersectsSphere( _sphere$4 ) === false ) return;
 
 			//
 
@@ -31623,6 +31818,134 @@
 		}
 
 		return data;
+
+	}
+
+	class WireframeGeometry extends BufferGeometry {
+
+		constructor( geometry ) {
+
+			super();
+			this.type = 'WireframeGeometry';
+
+			if ( geometry.isGeometry === true ) {
+
+				console.error( 'THREE.WireframeGeometry no longer supports THREE.Geometry. Use THREE.BufferGeometry instead.' );
+				return;
+
+			}
+
+			// buffer
+
+			const vertices = [];
+			const edges = new Set();
+
+			// helper variables
+
+			const start = new Vector3();
+			const end = new Vector3();
+
+			if ( geometry.index !== null ) {
+
+				// indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+				const indices = geometry.index;
+				let groups = geometry.groups;
+
+				if ( groups.length === 0 ) {
+
+					groups = [ { start: 0, count: indices.count, materialIndex: 0 } ];
+
+				}
+
+				// create a data structure that contains all eges without duplicates
+
+				for ( let o = 0, ol = groups.length; o < ol; ++ o ) {
+
+					const group = groups[ o ];
+
+					const groupStart = group.start;
+					const groupCount = group.count;
+
+					for ( let i = groupStart, l = ( groupStart + groupCount ); i < l; i += 3 ) {
+
+						for ( let j = 0; j < 3; j ++ ) {
+
+							const index1 = indices.getX( i + j );
+							const index2 = indices.getX( i + ( j + 1 ) % 3 );
+
+							start.fromBufferAttribute( position, index1 );
+							end.fromBufferAttribute( position, index2 );
+
+							if ( isUniqueEdge( start, end, edges ) === true ) {
+
+								vertices.push( start.x, start.y, start.z );
+								vertices.push( end.x, end.y, end.z );
+
+							}
+
+						}
+
+					}
+
+				}
+
+			} else {
+
+				// non-indexed BufferGeometry
+
+				const position = geometry.attributes.position;
+
+				for ( let i = 0, l = ( position.count / 3 ); i < l; i ++ ) {
+
+					for ( let j = 0; j < 3; j ++ ) {
+
+						// three edges per triangle, an edge is represented as (index1, index2)
+						// e.g. the first triangle has the following edges: (0,1),(1,2),(2,0)
+
+						const index1 = 3 * i + j;
+						const index2 = 3 * i + ( ( j + 1 ) % 3 );
+
+						start.fromBufferAttribute( position, index1 );
+						end.fromBufferAttribute( position, index2 );
+
+						if ( isUniqueEdge( start, end, edges ) === true ) {
+
+							vertices.push( start.x, start.y, start.z );
+							vertices.push( end.x, end.y, end.z );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			// build geometry
+
+			this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+
+		}
+
+	}
+
+	function isUniqueEdge( start, end, edges ) {
+
+		const hash1 = `${start.x},${start.y},${start.z}-${end.x},${end.y},${end.z}`;
+		const hash2 = `${end.x},${end.y},${end.z}-${start.x},${start.y},${start.z}`; // coincident edge
+
+		if ( edges.has( hash1 ) === true || edges.has( hash2 ) === true ) {
+
+			return false;
+
+		} else {
+
+			edges.add( hash1, hash2 );
+			return true;
+
+		}
 
 	}
 
@@ -39739,6 +40062,117 @@
 
 	InstancedInterleavedBuffer.prototype.isInstancedInterleavedBuffer = true;
 
+	const _startP = /*@__PURE__*/ new Vector3();
+	const _startEnd = /*@__PURE__*/ new Vector3();
+
+	class Line3 {
+
+		constructor( start = new Vector3(), end = new Vector3() ) {
+
+			this.start = start;
+			this.end = end;
+
+		}
+
+		set( start, end ) {
+
+			this.start.copy( start );
+			this.end.copy( end );
+
+			return this;
+
+		}
+
+		copy( line ) {
+
+			this.start.copy( line.start );
+			this.end.copy( line.end );
+
+			return this;
+
+		}
+
+		getCenter( target ) {
+
+			return target.addVectors( this.start, this.end ).multiplyScalar( 0.5 );
+
+		}
+
+		delta( target ) {
+
+			return target.subVectors( this.end, this.start );
+
+		}
+
+		distanceSq() {
+
+			return this.start.distanceToSquared( this.end );
+
+		}
+
+		distance() {
+
+			return this.start.distanceTo( this.end );
+
+		}
+
+		at( t, target ) {
+
+			return this.delta( target ).multiplyScalar( t ).add( this.start );
+
+		}
+
+		closestPointToPointParameter( point, clampToLine ) {
+
+			_startP.subVectors( point, this.start );
+			_startEnd.subVectors( this.end, this.start );
+
+			const startEnd2 = _startEnd.dot( _startEnd );
+			const startEnd_startP = _startEnd.dot( _startP );
+
+			let t = startEnd_startP / startEnd2;
+
+			if ( clampToLine ) {
+
+				t = clamp( t, 0, 1 );
+
+			}
+
+			return t;
+
+		}
+
+		closestPointToPoint( point, clampToLine, target ) {
+
+			const t = this.closestPointToPointParameter( point, clampToLine );
+
+			return this.delta( target ).multiplyScalar( t ).add( this.start );
+
+		}
+
+		applyMatrix4( matrix ) {
+
+			this.start.applyMatrix4( matrix );
+			this.end.applyMatrix4( matrix );
+
+			return this;
+
+		}
+
+		equals( line ) {
+
+			return line.start.equals( this.start ) && line.end.equals( this.end );
+
+		}
+
+		clone() {
+
+			return new this.constructor().copy( this );
+
+		}
+
+	}
+
 	class ImmediateRenderObject extends Object3D {
 
 		constructor( material ) {
@@ -40032,6 +40466,15 @@
 
 		console.warn( 'THREE.Frustum: .setFromMatrix() has been renamed to .setFromProjectionMatrix().' );
 		return this.setFromProjectionMatrix( m );
+
+	};
+
+	//
+
+	Line3.prototype.center = function ( optionalTarget ) {
+
+		console.warn( 'THREE.Line3: .center() has been renamed to .getCenter().' );
+		return this.getCenter( optionalTarget );
 
 	};
 
@@ -42924,20 +43367,917 @@
 
 	}
 
+	const THREE$2 = window.THREE ? window.THREE // Prefer consumption from global THREE, if exists
+	: {
+	  Box3,
+	  BufferGeometry,
+	  Float32BufferAttribute,
+	  InstancedBufferGeometry,
+	  InstancedInterleavedBuffer,
+	  InterleavedBufferAttribute,
+	  Sphere,
+	  Vector3,
+	  WireframeGeometry
+	}; // support multiple method names for backwards threejs compatibility
+
+	var setAttributeFn$1 = new THREE$2.BufferGeometry().setAttribute ? 'setAttribute' : 'addAttribute';
+
+	const _box$1 = new THREE$2.Box3();
+
+	const _vector = new THREE$2.Vector3();
+
+	class LineSegmentsGeometry extends THREE$2.InstancedBufferGeometry {
+	  constructor() {
+	    super();
+	    this.type = 'LineSegmentsGeometry';
+	    const positions = [-1, 2, 0, 1, 2, 0, -1, 1, 0, 1, 1, 0, -1, 0, 0, 1, 0, 0, -1, -1, 0, 1, -1, 0];
+	    const uvs = [-1, 2, 1, 2, -1, 1, 1, 1, -1, -1, 1, -1, -1, -2, 1, -2];
+	    const index = [0, 2, 1, 2, 3, 1, 2, 4, 3, 4, 5, 3, 4, 6, 5, 6, 7, 5];
+	    this.setIndex(index);
+	    this[setAttributeFn$1]('position', new THREE$2.Float32BufferAttribute(positions, 3));
+	    this[setAttributeFn$1]('uv', new THREE$2.Float32BufferAttribute(uvs, 2));
+	  }
+
+	  applyMatrix4(matrix) {
+	    const start = this.attributes.instanceStart;
+	    const end = this.attributes.instanceEnd;
+
+	    if (start !== undefined) {
+	      start.applyMatrix4(matrix);
+	      end.applyMatrix4(matrix);
+	      start.needsUpdate = true;
+	    }
+
+	    if (this.boundingBox !== null) {
+	      this.computeBoundingBox();
+	    }
+
+	    if (this.boundingSphere !== null) {
+	      this.computeBoundingSphere();
+	    }
+
+	    return this;
+	  }
+
+	  setPositions(array) {
+	    let lineSegments;
+
+	    if (array instanceof Float32Array) {
+	      lineSegments = array;
+	    } else if (Array.isArray(array)) {
+	      lineSegments = new Float32Array(array);
+	    }
+
+	    const instanceBuffer = new THREE$2.InstancedInterleavedBuffer(lineSegments, 6, 1); // xyz, xyz
+
+	    this[setAttributeFn$1]('instanceStart', new THREE$2.InterleavedBufferAttribute(instanceBuffer, 3, 0)); // xyz
+
+	    this[setAttributeFn$1]('instanceEnd', new THREE$2.InterleavedBufferAttribute(instanceBuffer, 3, 3)); // xyz
+	    //
+
+	    this.computeBoundingBox();
+	    this.computeBoundingSphere();
+	    return this;
+	  }
+
+	  setColors(array) {
+	    let colors;
+
+	    if (array instanceof Float32Array) {
+	      colors = array;
+	    } else if (Array.isArray(array)) {
+	      colors = new Float32Array(array);
+	    }
+
+	    const instanceColorBuffer = new THREE$2.InstancedInterleavedBuffer(colors, 6, 1); // rgb, rgb
+
+	    this[setAttributeFn$1]('instanceColorStart', new THREE$2.InterleavedBufferAttribute(instanceColorBuffer, 3, 0)); // rgb
+
+	    this[setAttributeFn$1]('instanceColorEnd', new THREE$2.InterleavedBufferAttribute(instanceColorBuffer, 3, 3)); // rgb
+
+	    return this;
+	  }
+
+	  fromWireframeGeometry(geometry) {
+	    this.setPositions(geometry.attributes.position.array);
+	    return this;
+	  }
+
+	  fromEdgesGeometry(geometry) {
+	    this.setPositions(geometry.attributes.position.array);
+	    return this;
+	  }
+
+	  fromMesh(mesh) {
+	    this.fromWireframeGeometry(new THREE$2.WireframeGeometry(mesh.geometry)); // set colors, maybe
+
+	    return this;
+	  }
+
+	  romLineSegments(lineSegments) {
+	    const geometry = lineSegments.geometry;
+
+	    if (geometry.isGeometry) {
+	      console.error('LineSegmentsGeometry no longer supports Geometry. Use THREE.BufferGeometry instead.');
+	      return;
+	    } else if (geometry.isBufferGeometry) {
+	      this.setPositions(geometry.attributes.position.array); // assumes non-indexed
+	    } // set colors, maybe
+
+
+	    return this;
+	  }
+
+	  computeBoundingBox() {
+	    if (this.boundingBox === null) {
+	      this.boundingBox = new THREE$2.Box3();
+	    }
+
+	    const start = this.attributes.instanceStart;
+	    const end = this.attributes.instanceEnd;
+
+	    if (start !== undefined && end !== undefined) {
+	      this.boundingBox.setFromBufferAttribute(start);
+
+	      _box$1.setFromBufferAttribute(end);
+
+	      this.boundingBox.union(_box$1);
+	    }
+	  }
+
+	  computeBoundingSphere() {
+	    if (this.boundingSphere === null) {
+	      this.boundingSphere = new THREE$2.Sphere();
+	    }
+
+	    if (this.boundingBox === null) {
+	      this.computeBoundingBox();
+	    }
+
+	    const start = this.attributes.instanceStart;
+	    const end = this.attributes.instanceEnd;
+
+	    if (start !== undefined && end !== undefined) {
+	      const center = this.boundingSphere.center;
+	      this.boundingBox.getCenter(center);
+	      let maxRadiusSq = 0;
+
+	      for (let i = 0, il = start.count; i < il; i++) {
+	        _vector.fromBufferAttribute(start, i);
+
+	        maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(_vector));
+
+	        _vector.fromBufferAttribute(end, i);
+
+	        maxRadiusSq = Math.max(maxRadiusSq, center.distanceToSquared(_vector));
+	      }
+
+	      this.boundingSphere.radius = Math.sqrt(maxRadiusSq);
+
+	      if (isNaN(this.boundingSphere.radius)) {
+	        console.error('THREE.LineSegmentsGeometry.computeBoundingSphere(): Computed radius is NaN. The instanced position data is likely to have NaN values.', this);
+	      }
+	    }
+	  }
+
+	  toJSON() {// todo
+	  }
+
+	  applyMatrix(matrix) {
+	    console.warn('THREE.LineSegmentsGeometry: applyMatrix() has been renamed to applyMatrix4().');
+	    return this.applyMatrix4(matrix);
+	  }
+
+	}
+
+	LineSegmentsGeometry.prototype.isLineSegmentsGeometry = true;
+
+	/**
+	 * parameters = {
+	 *  color: <hex>,
+	 *  linewidth: <float>,
+	 *  dashed: <boolean>,
+	 *  dashScale: <float>,
+	 *  dashSize: <float>,
+	 *  dashOffset: <float>,
+	 *  gapSize: <float>,
+	 *  resolution: <Vector2>, // to be set by renderer
+	 * }
+	 */
+	const THREE$1 = window.THREE ? window.THREE // Prefer consumption from global THREE, if exists
+	: {
+	  ShaderLib,
+	  ShaderMaterial,
+	  UniformsLib,
+	  UniformsUtils,
+	  Vector2
+	};
+	THREE$1.UniformsLib.line = {
+	  linewidth: {
+	    value: 1
+	  },
+	  resolution: {
+	    value: new Vector2(1, 1)
+	  },
+	  dashScale: {
+	    value: 1
+	  },
+	  dashSize: {
+	    value: 1
+	  },
+	  dashOffset: {
+	    value: 0
+	  },
+	  gapSize: {
+	    value: 1
+	  },
+	  // todo FIX - maybe change to totalSize
+	  opacity: {
+	    value: 1
+	  }
+	};
+	THREE$1.ShaderLib['line'] = {
+	  uniforms: THREE$1.UniformsUtils.merge([THREE$1.UniformsLib.common, THREE$1.UniformsLib.fog, THREE$1.UniformsLib.line]),
+	  vertexShader: `
+		#include <common>
+		#include <color_pars_vertex>
+		#include <fog_pars_vertex>
+		#include <logdepthbuf_pars_vertex>
+		#include <clipping_planes_pars_vertex>
+
+		uniform float linewidth;
+		uniform vec2 resolution;
+
+		attribute vec3 instanceStart;
+		attribute vec3 instanceEnd;
+
+		attribute vec3 instanceColorStart;
+		attribute vec3 instanceColorEnd;
+
+		varying vec2 vUv;
+
+		#ifdef USE_DASH
+
+			uniform float dashScale;
+			attribute float instanceDistanceStart;
+			attribute float instanceDistanceEnd;
+			varying float vLineDistance;
+
+		#endif
+
+		void trimSegment( const in vec4 start, inout vec4 end ) {
+
+			// trim end segment so it terminates between the camera plane and the near plane
+
+			// conservative estimate of the near plane
+			float a = projectionMatrix[ 2 ][ 2 ]; // 3nd entry in 3th column
+			float b = projectionMatrix[ 3 ][ 2 ]; // 3nd entry in 4th column
+			float nearEstimate = - 0.5 * b / a;
+
+			float alpha = ( nearEstimate - start.z ) / ( end.z - start.z );
+
+			end.xyz = mix( start.xyz, end.xyz, alpha );
+
+		}
+
+		void main() {
+
+			#ifdef USE_COLOR
+
+				vColor.xyz = ( position.y < 0.5 ) ? instanceColorStart : instanceColorEnd;
+
+			#endif
+
+			#ifdef USE_DASH
+
+				vLineDistance = ( position.y < 0.5 ) ? dashScale * instanceDistanceStart : dashScale * instanceDistanceEnd;
+
+			#endif
+
+			float aspect = resolution.x / resolution.y;
+
+			vUv = uv;
+
+			// camera space
+			vec4 start = modelViewMatrix * vec4( instanceStart, 1.0 );
+			vec4 end = modelViewMatrix * vec4( instanceEnd, 1.0 );
+
+			// special case for perspective projection, and segments that terminate either in, or behind, the camera plane
+			// clearly the gpu firmware has a way of addressing this issue when projecting into ndc space
+			// but we need to perform ndc-space calculations in the shader, so we must address this issue directly
+			// perhaps there is a more elegant solution -- WestLangley
+
+			bool perspective = ( projectionMatrix[ 2 ][ 3 ] == - 1.0 ); // 4th entry in the 3rd column
+
+			if ( perspective ) {
+
+				if ( start.z < 0.0 && end.z >= 0.0 ) {
+
+					trimSegment( start, end );
+
+				} else if ( end.z < 0.0 && start.z >= 0.0 ) {
+
+					trimSegment( end, start );
+
+				}
+
+			}
+
+			// clip space
+			vec4 clipStart = projectionMatrix * start;
+			vec4 clipEnd = projectionMatrix * end;
+
+			// ndc space
+			vec2 ndcStart = clipStart.xy / clipStart.w;
+			vec2 ndcEnd = clipEnd.xy / clipEnd.w;
+
+			// direction
+			vec2 dir = ndcEnd - ndcStart;
+
+			// account for clip-space aspect ratio
+			dir.x *= aspect;
+			dir = normalize( dir );
+
+			// perpendicular to dir
+			vec2 offset = vec2( dir.y, - dir.x );
+
+			// undo aspect ratio adjustment
+			dir.x /= aspect;
+			offset.x /= aspect;
+
+			// sign flip
+			if ( position.x < 0.0 ) offset *= - 1.0;
+
+			// endcaps
+			if ( position.y < 0.0 ) {
+
+				offset += - dir;
+
+			} else if ( position.y > 1.0 ) {
+
+				offset += dir;
+
+			}
+
+			// adjust for linewidth
+			offset *= linewidth;
+
+			// adjust for clip-space to screen-space conversion // maybe resolution should be based on viewport ...
+			offset /= resolution.y;
+
+			// select end
+			vec4 clip = ( position.y < 0.5 ) ? clipStart : clipEnd;
+
+			// back to clip space
+			offset *= clip.w;
+
+			clip.xy += offset;
+
+			gl_Position = clip;
+
+			vec4 mvPosition = ( position.y < 0.5 ) ? start : end; // this is an approximation
+
+			#include <logdepthbuf_vertex>
+			#include <clipping_planes_vertex>
+			#include <fog_vertex>
+
+		}
+		`,
+	  fragmentShader: `
+		uniform vec3 diffuse;
+		uniform float opacity;
+
+		#ifdef USE_DASH
+
+			uniform float dashSize;
+			uniform float dashOffset;
+			uniform float gapSize;
+
+		#endif
+
+		varying float vLineDistance;
+
+		#include <common>
+		#include <color_pars_fragment>
+		#include <fog_pars_fragment>
+		#include <logdepthbuf_pars_fragment>
+		#include <clipping_planes_pars_fragment>
+
+		varying vec2 vUv;
+
+		void main() {
+
+			#include <clipping_planes_fragment>
+
+			#ifdef USE_DASH
+
+				if ( vUv.y < - 1.0 || vUv.y > 1.0 ) discard; // discard endcaps
+
+				if ( mod( vLineDistance + dashOffset, dashSize + gapSize ) > dashSize ) discard; // todo - FIX
+
+			#endif
+
+			if ( abs( vUv.y ) > 1.0 ) {
+
+				float a = vUv.x;
+				float b = ( vUv.y > 0.0 ) ? vUv.y - 1.0 : vUv.y + 1.0;
+				float len2 = a * a + b * b;
+
+				if ( len2 > 1.0 ) discard;
+
+			}
+
+			vec4 diffuseColor = vec4( diffuse, opacity );
+
+			#include <logdepthbuf_fragment>
+			#include <color_fragment>
+
+			gl_FragColor = vec4( diffuseColor.rgb, diffuseColor.a );
+
+			#include <tonemapping_fragment>
+			#include <encodings_fragment>
+			#include <fog_fragment>
+			#include <premultiplied_alpha_fragment>
+
+		}
+		`
+	};
+
+	class LineMaterial extends THREE$1.ShaderMaterial {
+	  constructor(parameters) {
+	    super({
+	      type: 'LineMaterial',
+	      uniforms: THREE$1.UniformsUtils.clone(THREE$1.ShaderLib['line'].uniforms),
+	      vertexShader: THREE$1.ShaderLib['line'].vertexShader,
+	      fragmentShader: THREE$1.ShaderLib['line'].fragmentShader,
+	      clipping: true // required for clipping support
+
+	    });
+	    this.dashed = false;
+	    Object.defineProperties(this, {
+	      color: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.diffuse.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.diffuse.value = value;
+	        }
+	      },
+	      linewidth: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.linewidth.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.linewidth.value = value;
+	        }
+	      },
+	      dashScale: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.dashScale.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.dashScale.value = value;
+	        }
+	      },
+	      dashSize: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.dashSize.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.dashSize.value = value;
+	        }
+	      },
+	      dashOffset: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.dashOffset.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.dashOffset.value = value;
+	        }
+	      },
+	      gapSize: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.gapSize.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.gapSize.value = value;
+	        }
+	      },
+	      opacity: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.opacity.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.opacity.value = value;
+	        }
+	      },
+	      resolution: {
+	        enumerable: true,
+	        get: function () {
+	          return this.uniforms.resolution.value;
+	        },
+	        set: function (value) {
+	          this.uniforms.resolution.value.copy(value);
+	        }
+	      },
+	      alphaToCoverage: {
+	        enumerable: true,
+	        get: function () {
+	          return Boolean('ALPHA_TO_COVERAGE' in this.defines);
+	        },
+	        set: function (value) {
+	          if (Boolean(value) !== Boolean('ALPHA_TO_COVERAGE' in this.defines)) {
+	            this.needsUpdate = true;
+	          }
+
+	          if (value) {
+	            this.defines.ALPHA_TO_COVERAGE = '';
+	            this.extensions.derivatives = true;
+	          } else {
+	            delete this.defines.ALPHA_TO_COVERAGE;
+	            this.extensions.derivatives = false;
+	          }
+	        }
+	      }
+	    });
+	    this.setValues(parameters);
+	  }
+
+	}
+
+	LineMaterial.prototype.isLineMaterial = true;
+
+	const THREE = window.THREE ? window.THREE // Prefer consumption from global THREE, if exists
+	: {
+	  Box3,
+	  BufferGeometry,
+	  InstancedInterleavedBuffer,
+	  InterleavedBufferAttribute,
+	  Line3,
+	  MathUtils,
+	  Matrix4,
+	  Mesh,
+	  Sphere,
+	  Vector3,
+	  Vector4
+	};
+
+	var setAttributeFn = new THREE.BufferGeometry().setAttribute ? 'setAttribute' : 'addAttribute';
+
+	const _start = new THREE.Vector3();
+
+	const _end = new THREE.Vector3();
+
+	const _start4 = new THREE.Vector4();
+
+	const _end4 = new THREE.Vector4();
+
+	const _ssOrigin = new THREE.Vector4();
+
+	const _ssOrigin3 = new THREE.Vector3();
+
+	const _mvMatrix = new THREE.Matrix4();
+
+	const _line = new THREE.Line3();
+
+	const _closestPoint = new THREE.Vector3();
+
+	const _box = new THREE.Box3();
+
+	const _sphere = new THREE.Sphere();
+
+	const _clipToWorldVector = new THREE.Vector4();
+
+	class LineSegments2 extends THREE.Mesh {
+	  constructor(geometry = new LineSegmentsGeometry(), material = new LineMaterial({
+	    color: Math.random() * 0xffffff
+	  })) {
+	    super(geometry, material);
+	    this.type = 'LineSegments2';
+	  } // for backwards-compatability, but could be a method of LineSegmentsGeometry...
+
+
+	  computeLineDistances() {
+	    const geometry = this.geometry;
+	    const instanceStart = geometry.attributes.instanceStart;
+	    const instanceEnd = geometry.attributes.instanceEnd;
+	    const lineDistances = new Float32Array(2 * instanceStart.count);
+
+	    for (let i = 0, j = 0, l = instanceStart.count; i < l; i++, j += 2) {
+	      _start.fromBufferAttribute(instanceStart, i);
+
+	      _end.fromBufferAttribute(instanceEnd, i);
+
+	      lineDistances[j] = j === 0 ? 0 : lineDistances[j - 1];
+	      lineDistances[j + 1] = lineDistances[j] + _start.distanceTo(_end);
+	    }
+
+	    const instanceDistanceBuffer = new THREE.InstancedInterleavedBuffer(lineDistances, 2, 1); // d0, d1
+
+	    geometry[setAttributeFn]('instanceDistanceStart', new THREE.InterleavedBufferAttribute(instanceDistanceBuffer, 1, 0)); // d0
+
+	    geometry[setAttributeFn]('instanceDistanceEnd', new THREE.InterleavedBufferAttribute(instanceDistanceBuffer, 1, 1)); // d1
+
+	    return this;
+	  }
+
+	  raycast(raycaster, intersects) {
+	    if (raycaster.camera === null) {
+	      console.error('LineSegments2: "Raycaster.camera" needs to be set in order to raycast against LineSegments2.');
+	    }
+
+	    const threshold = raycaster.params.Line2 !== undefined ? raycaster.params.Line2.threshold || 0 : 0;
+	    const ray = raycaster.ray;
+	    const camera = raycaster.camera;
+	    const projectionMatrix = camera.projectionMatrix;
+	    const matrixWorld = this.matrixWorld;
+	    const geometry = this.geometry;
+	    const material = this.material;
+	    const resolution = material.resolution;
+	    const lineWidth = material.linewidth + threshold;
+	    const instanceStart = geometry.attributes.instanceStart;
+	    const instanceEnd = geometry.attributes.instanceEnd; // camera forward is negative
+
+	    const near = -camera.near; // clip space is [ - 1, 1 ] so multiply by two to get the full
+	    // width in clip space
+
+	    const ssMaxWidth = 2.0 * Math.max(lineWidth / resolution.width, lineWidth / resolution.height); //
+	    // check if we intersect the sphere bounds
+
+	    if (geometry.boundingSphere === null) {
+	      geometry.computeBoundingSphere();
+	    }
+
+	    _sphere.copy(geometry.boundingSphere).applyMatrix4(matrixWorld);
+
+	    const distanceToSphere = Math.max(camera.near, _sphere.distanceToPoint(ray.origin)); // get the w component to scale the world space line width
+
+	    _clipToWorldVector.set(0, 0, -distanceToSphere, 1.0).applyMatrix4(camera.projectionMatrix);
+
+	    _clipToWorldVector.multiplyScalar(1.0 / _clipToWorldVector.w);
+
+	    _clipToWorldVector.applyMatrix4(camera.projectionMatrixInverse); // increase the sphere bounds by the worst case line screen space width
+
+
+	    const sphereMargin = Math.abs(ssMaxWidth / _clipToWorldVector.w) * 0.5;
+	    _sphere.radius += sphereMargin;
+
+	    if (raycaster.ray.intersectsSphere(_sphere) === false) {
+	      return;
+	    } //
+	    // check if we intersect the box bounds
+
+
+	    if (geometry.boundingBox === null) {
+	      geometry.computeBoundingBox();
+	    }
+
+	    _box.copy(geometry.boundingBox).applyMatrix4(matrixWorld);
+
+	    const distanceToBox = Math.max(camera.near, _box.distanceToPoint(ray.origin)); // get the w component to scale the world space line width
+
+	    _clipToWorldVector.set(0, 0, -distanceToBox, 1.0).applyMatrix4(camera.projectionMatrix);
+
+	    _clipToWorldVector.multiplyScalar(1.0 / _clipToWorldVector.w);
+
+	    _clipToWorldVector.applyMatrix4(camera.projectionMatrixInverse); // increase the sphere bounds by the worst case line screen space width
+
+
+	    const boxMargin = Math.abs(ssMaxWidth / _clipToWorldVector.w) * 0.5;
+	    _box.max.x += boxMargin;
+	    _box.max.y += boxMargin;
+	    _box.max.z += boxMargin;
+	    _box.min.x -= boxMargin;
+	    _box.min.y -= boxMargin;
+	    _box.min.z -= boxMargin;
+
+	    if (raycaster.ray.intersectsBox(_box) === false) {
+	      return;
+	    } //
+	    // pick a point 1 unit out along the ray to avoid the ray origin
+	    // sitting at the camera origin which will cause "w" to be 0 when
+	    // applying the projection matrix.
+
+
+	    ray.at(1, _ssOrigin); // ndc space [ - 1.0, 1.0 ]
+
+	    _ssOrigin.w = 1;
+
+	    _ssOrigin.applyMatrix4(camera.matrixWorldInverse);
+
+	    _ssOrigin.applyMatrix4(projectionMatrix);
+
+	    _ssOrigin.multiplyScalar(1 / _ssOrigin.w); // screen space
+
+
+	    _ssOrigin.x *= resolution.x / 2;
+	    _ssOrigin.y *= resolution.y / 2;
+	    _ssOrigin.z = 0;
+
+	    _ssOrigin3.copy(_ssOrigin);
+
+	    _mvMatrix.multiplyMatrices(camera.matrixWorldInverse, matrixWorld);
+
+	    for (let i = 0, l = instanceStart.count; i < l; i++) {
+	      _start4.fromBufferAttribute(instanceStart, i);
+
+	      _end4.fromBufferAttribute(instanceEnd, i);
+
+	      _start.w = 1;
+	      _end.w = 1; // camera space
+
+	      _start4.applyMatrix4(_mvMatrix);
+
+	      _end4.applyMatrix4(_mvMatrix); // skip the segment if it's entirely behind the camera
+
+
+	      var isBehindCameraNear = _start4.z > near && _end4.z > near;
+
+	      if (isBehindCameraNear) {
+	        continue;
+	      } // trim the segment if it extends behind camera near
+
+
+	      if (_start4.z > near) {
+	        const deltaDist = _start4.z - _end4.z;
+	        const t = (_start4.z - near) / deltaDist;
+
+	        _start4.lerp(_end4, t);
+	      } else if (_end4.z > near) {
+	        const deltaDist = _end4.z - _start4.z;
+	        const t = (_end4.z - near) / deltaDist;
+
+	        _end4.lerp(_start4, t);
+	      } // clip space
+
+
+	      _start4.applyMatrix4(projectionMatrix);
+
+	      _end4.applyMatrix4(projectionMatrix); // ndc space [ - 1.0, 1.0 ]
+
+
+	      _start4.multiplyScalar(1 / _start4.w);
+
+	      _end4.multiplyScalar(1 / _end4.w); // screen space
+
+
+	      _start4.x *= resolution.x / 2;
+	      _start4.y *= resolution.y / 2;
+	      _end4.x *= resolution.x / 2;
+	      _end4.y *= resolution.y / 2; // create 2d segment
+
+	      _line.start.copy(_start4);
+
+	      _line.start.z = 0;
+
+	      _line.end.copy(_end4);
+
+	      _line.end.z = 0; // get closest point on ray to segment
+
+	      const param = _line.closestPointToPointParameter(_ssOrigin3, true);
+
+	      _line.at(param, _closestPoint); // check if the intersection point is within clip space
+
+
+	      const zPos = THREE.MathUtils.lerp(_start4.z, _end4.z, param);
+	      const isInClipSpace = zPos >= -1 && zPos <= 1;
+	      const isInside = _ssOrigin3.distanceTo(_closestPoint) < lineWidth * 0.5;
+
+	      if (isInClipSpace && isInside) {
+	        _line.start.fromBufferAttribute(instanceStart, i);
+
+	        _line.end.fromBufferAttribute(instanceEnd, i);
+
+	        _line.start.applyMatrix4(matrixWorld);
+
+	        _line.end.applyMatrix4(matrixWorld);
+
+	        const pointOnLine = new THREE.Vector3();
+	        const point = new THREE.Vector3();
+	        ray.distanceSqToSegment(_line.start, _line.end, point, pointOnLine);
+	        intersects.push({
+	          point: point,
+	          pointOnLine: pointOnLine,
+	          distance: ray.origin.distanceTo(point),
+	          object: this,
+	          face: null,
+	          faceIndex: i,
+	          uv: null,
+	          uv2: null
+	        });
+	      }
+	    }
+	  }
+
+	}
+
+	LineSegments2.prototype.LineSegments2 = true;
+
+	class LineGeometry extends LineSegmentsGeometry {
+	  constructor() {
+	    super();
+	    this.type = 'LineGeometry';
+	  }
+
+	  setPositions(array) {
+	    // converts [ x1, y1, z1,  x2, y2, z2, ... ] to pairs format
+	    var length = array.length - 3;
+	    var points = new Float32Array(2 * length);
+
+	    for (var i = 0; i < length; i += 3) {
+	      points[2 * i] = array[i];
+	      points[2 * i + 1] = array[i + 1];
+	      points[2 * i + 2] = array[i + 2];
+	      points[2 * i + 3] = array[i + 3];
+	      points[2 * i + 4] = array[i + 4];
+	      points[2 * i + 5] = array[i + 5];
+	    }
+
+	    super.setPositions(points);
+	    return this;
+	  }
+
+	  setColors(array) {
+	    // converts [ r1, g1, b1,  r2, g2, b2, ... ] to pairs format
+	    var length = array.length - 3;
+	    var colors = new Float32Array(2 * length);
+
+	    for (var i = 0; i < length; i += 3) {
+	      colors[2 * i] = array[i];
+	      colors[2 * i + 1] = array[i + 1];
+	      colors[2 * i + 2] = array[i + 2];
+	      colors[2 * i + 3] = array[i + 3];
+	      colors[2 * i + 4] = array[i + 4];
+	      colors[2 * i + 5] = array[i + 5];
+	    }
+
+	    super.setColors(colors);
+	    return this;
+	  }
+
+	  fromLine(line) {
+	    var geometry = line.geometry;
+
+	    if (geometry.isGeometry) {
+	      console.error('LineGeometry no longer supports Geometry. Use THREE.BufferGeometry instead.');
+	      return;
+	    } else if (geometry.isBufferGeometry) {
+	      this.setPositions(geometry.attributes.position.array); // assumes non-indexed
+	    } // set colors, maybe
+
+
+	    return this;
+	  }
+
+	  copy() {
+	    // todo
+	    return this;
+	  }
+
+	}
+
+	LineGeometry.prototype.isLineGeometry = true;
+
+	class Line2 extends LineSegments2 {
+	  constructor(geometry = new LineGeometry(), material = new LineMaterial({
+	    color: Math.random() * 0xffffff
+	  })) {
+	    super(geometry, material);
+	    this.type = 'Line2';
+	  }
+
+	}
+
+	Line2.prototype.isLine2 = true;
+
 	//scene
 	let canvas, camera, scene, light, renderer,
-		chiselObj, povitPoint, shiftObj;
+		chiselObj, shiftObj;
 	//popup
 	let popupPlaneMesh,
-		popupBtn = document.getElementById('popupBtn');
-		JSON.parse(popupData);
+		popupBtn = document.getElementById('popupBtn'),
+		popupTexts = JSON.parse(popupData);
 	//params
 	let params = {
 		sceneWidth: 850,
 		sceneHeight: 450,
 		bgSrc: './assets/img/interaction_center_chisel_bg.jpg',
 		popupSrc: './assets/img/popup.png',
-		isSimulationActive: false
+		isSimulationActive: false,
+		isChiselLocked: false,
+		isSetChiselCorrect: undefined,
+		lineWidth: 3,
+		lineColor: '#000000',
+		successChiselAngle: 194.5 * Math.PI / 180.0,
+		maxAngleOffset: 1.0 * Math.PI / 180.0,
+		waitPopupTime: 1000
 	};
 
 	let objectsParams = {
@@ -42946,10 +44286,16 @@
 			chiselObj: 'chisel.obj',
 			chiselMtl: 'chisel.mtl',
 			scale: new Vector3(1.0, 1.0, 1.0),
-			position: new Vector3(-15.0, -5, 0.0),
-			rotation: new Vector3(15 * Math.PI / 180.0,
-					180.0 * Math.PI / 180.0, 0.0)
-		},
+			position: new Vector3(-16.5, -4.0, -18.0),
+			rotation: new Vector3(
+				8.0 * Math.PI / 180.0,
+				185.0 * Math.PI / 180.0,
+				3.0 * Math.PI / 180.0),
+			rotationPointShift: -15.0,
+			rotationStep: 0.005,
+			minAngle: 182.0 * Math.PI / 180.0,
+			maxAngle: 208.0 * Math.PI / 180.0
+		}
 	};
 
 	class App {
@@ -42967,7 +44313,7 @@
 			scene.add(light);
 			
 			//renderer
-			renderer = new WebGLRenderer({ canvas: canvas, alpha: true });
+			renderer = new WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 			renderer.setClearColor(0xffffff);
 
 			//Load background texture
@@ -42977,16 +44323,13 @@
 				scene.background = texture;
 			});
 
-			povitPoint = new Object3D();
+			//parent obj 
 			shiftObj = new Object3D();
-			shiftObj.add(povitPoint);
-			scene.add(shiftObj);
-			//objects		
+			
+			//chisel obj		
 			chiselObj = new Object3D();
 			let mtlLoader = new MTLLoader();
 			mtlLoader.setPath(objectsParams.modelPath);
-
-			//load patient body
 			mtlLoader.load(objectsParams.chisel.chiselMtl, function (materials) {
 				materials.preload();
 				let objLoader = new OBJLoader();
@@ -42994,22 +44337,31 @@
 				objLoader.setPath(objectsParams.modelPath);
 				objLoader.load(objectsParams.chisel.chiselObj, function (object) {
 					object.scale.copy(objectsParams.chisel.scale);
-					//object.position.copy(objectsParams.chisel.position);
-					//object.rotation.setFromVector3(objectsParams.chisel.rotation);
 					chiselObj.add(object);
-					//scene.add(chiselObj);
 				});
 			});
+			//parent obj params
+			shiftObj.position.copy(objectsParams.chisel.position);
+			shiftObj.rotation.setFromVector3(objectsParams.chisel.rotation);
+			shiftObj.add(chiselObj);
+			scene.add(shiftObj);
+			chiselObj.position.z = objectsParams.chisel.rotationPointShift;
 
-			povitPoint.add(chiselObj);
-			shiftObj.position.set(-12, -5.5, 0);
-			chiselObj.rotation.y = 195.0 * Math.PI / 180.0;
-			chiselObj.rotation.x = 8.0 * Math.PI / 180.0;
-			chiselObj.rotation.z = 3.0 * Math.PI / 180.0;
-		
+			//line
+			const lineMtl = new LineMaterial({
+				color: params.lineColor,
+				linewidth: params.lineWidth, // px
+				resolution: new Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
+			});
+			const lineGeometry = new LineGeometry();
+			const lineEndsPositionArray = [ -15.7, 2.5, -15.0, -15.7, -3.5, -15.0 ];
+			lineGeometry.setPositions(lineEndsPositionArray);
+			const lineObj = new Line2(lineGeometry, lineMtl);
+			scene.add(lineObj);
+			
 			//popup
-			//createPopupPlane();
-			//addPopup();
+			createPopupPlane();
+			addPopup();
 
 			renderer.render(scene, camera);
 			canvas.addEventListener('mousemove', onMouseMove, false);
@@ -43021,16 +44373,90 @@
 	}
 
 	function onMouseMove(e) {
-		
+		if (params.isChiselLocked) {
+			//get movement of the mouse in lock API
+			let movementX = e.movementX ||
+				e.mozMovementX ||
+				e.webkitMovementX ||
+				0;
+			let newAngle = shiftObj.rotation.y + movementX * objectsParams.chisel.rotationStep;
+			if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
+			{
+				shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
+			}
+		}
 	}
 
 	function onMouseDown() {
-		
+		if (!params.isSimulationActive) return;
+		if (params.isChiselLocked) {
+			//unlock
+			document.exitPointerLock = document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock;
+			document.exitPointerLock();
+			params.isChiselLocked = false;
+			//check
+			if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
+			{
+				params.isSetChiselCorrect = true;
+			}
+			else
+				params.isSetChiselCorrect = false;
+			setTimeout(() => {
+					addPopup();
+				}, params.waitPopupTime);
+		}
+		else {
+			//lock
+			canvas.requestPointerLock = canvas.requestPointerLock ||
+				canvas.mozRequestPointerLock ||
+				canvas.webkitRequestPointerLock;
+			canvas.requestPointerLock();
+			params.isChiselLocked = true;
+		}
 	}
 
 	function animate() {
 		requestAnimationFrame(animate);
 		renderer.render(scene, camera);
+	}
+
+	function createPopupPlane() {
+		const popupPlane = new PlaneGeometry(params.sceneWidth, params.sceneHeight, 10.0);
+		const loader = new TextureLoader();
+		const popupMaterial = new MeshBasicMaterial({
+			map: loader.load(params.popupSrc, function (texture) {
+				texture.minFilter = LinearFilter; }),
+			transparent: true
+		});    
+		popupPlaneMesh = new Mesh(popupPlane, popupMaterial);
+		popupPlaneMesh.scale.set(0.035, 0.035, 0.035);
+		popupPlaneMesh.position.z = 10;
+	}
+
+	function addPopup() {
+		scene.add(popupPlaneMesh);
+		params.isSimulationActive = false;
+		//interface
+		document.getElementById('popupTitle').style.display = 'block';
+		document.getElementById('popupText').style.display = 'block';
+		popupBtn.style.display = 'block';
+		if (params.isSetChiselCorrect === undefined) {
+			document.getElementById('popupTitle').value = popupTexts.introTitle;
+			document.getElementById('popupText').value = popupTexts.introText;
+			return;
+		}
+		if (params.isSetChiselCorrect) {
+			document.getElementById('popupTitle').value = popupTexts.correctTitle;
+			document.getElementById('popupText').value = popupTexts.correctText;
+			return;
+		}
+		if (!params.isSetChiselCorrect) {
+			document.getElementById('popupTitle').value = popupTexts.uncorrectTitle;
+			document.getElementById('popupText').value = popupTexts.uncorrectText;
+			return;
+		}
 	}
 
 	function removePopup() {
@@ -43040,7 +44466,9 @@
 		document.getElementById('popupTitle').style.display = 'none';
 		document.getElementById('popupText').style.display = 'none';
 		popupBtn.style.display = 'none';
-		if(!findMiddleParams.isSetNeedleCorrect) ;
+		if(!params.isSetChiselCorrect) {
+			onMouseDown();
+		}
 	}
 
 	const app = new App();

@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 
 //scene
 let canvas, camera, scene, light, renderer,
-	chiselObj, povitPoint, shiftObj;
+	chiselObj, shiftObj;
 //popup
 let popupPlaneMesh,
 	popupBtn = document.getElementById('popupBtn'),
@@ -15,7 +16,14 @@ let params = {
 	sceneHeight: 450,
 	bgSrc: './assets/img/interaction_center_chisel_bg.jpg',
 	popupSrc: './assets/img/popup.png',
-	isSimulationActive: false
+	isSimulationActive: false,
+	isChiselLocked: false,
+	isSetChiselCorrect: undefined,
+	lineWidth: 3,
+	lineColor: '#000000',
+	successChiselAngle: 194.5 * Math.PI / 180.0,
+	maxAngleOffset: 1.0 * Math.PI / 180.0,
+	waitPopupTime: 1000
 };
 
 let objectsParams = {
@@ -24,10 +32,16 @@ let objectsParams = {
 		chiselObj: 'chisel.obj',
 		chiselMtl: 'chisel.mtl',
 		scale: new THREE.Vector3(1.0, 1.0, 1.0),
-		position: new THREE.Vector3(-15.0, -5, 0.0),
-		rotation: new THREE.Vector3(15 * Math.PI / 180.0,
-				180.0 * Math.PI / 180.0, 0.0)
-	},
+		position: new THREE.Vector3(-16.5, -4.0, -18.0),
+		rotation: new THREE.Vector3(
+			8.0 * Math.PI / 180.0,
+			185.0 * Math.PI / 180.0,
+			3.0 * Math.PI / 180.0),
+		rotationPointShift: -15.0,
+		rotationStep: 0.005,
+		minAngle: 182.0 * Math.PI / 180.0,
+		maxAngle: 208.0 * Math.PI / 180.0
+	}
 };
 
 class App {
@@ -45,7 +59,7 @@ class App {
 		scene.add(light);
 		
 		//renderer
-		renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+		renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 		renderer.setClearColor(0xffffff);
 
 		//Load background texture
@@ -55,16 +69,13 @@ class App {
 			scene.background = texture;
 		});
 
-		povitPoint = new THREE.Object3D();
+		//parent obj 
 		shiftObj = new THREE.Object3D();
-		shiftObj.add(povitPoint);
-		scene.add(shiftObj);
-		//objects		
+		
+		//chisel obj		
 		chiselObj = new THREE.Object3D();
 		let mtlLoader = new MTLLoader();
 		mtlLoader.setPath(objectsParams.modelPath);
-
-		//load patient body
 		mtlLoader.load(objectsParams.chisel.chiselMtl, function (materials) {
 			materials.preload();
 			let objLoader = new OBJLoader();
@@ -72,22 +83,31 @@ class App {
 			objLoader.setPath(objectsParams.modelPath);
 			objLoader.load(objectsParams.chisel.chiselObj, function (object) {
 				object.scale.copy(objectsParams.chisel.scale);
-				//object.position.copy(objectsParams.chisel.position);
-				//object.rotation.setFromVector3(objectsParams.chisel.rotation);
 				chiselObj.add(object);
-				//scene.add(chiselObj);
 			});
 		});
+		//parent obj params
+		shiftObj.position.copy(objectsParams.chisel.position);
+		shiftObj.rotation.setFromVector3(objectsParams.chisel.rotation);
+		shiftObj.add(chiselObj);
+		scene.add(shiftObj);
+		chiselObj.position.z = objectsParams.chisel.rotationPointShift;
 
-		povitPoint.add(chiselObj);
-		shiftObj.position.set(-12, -5.5, 0);
-		chiselObj.rotation.y = 195.0 * Math.PI / 180.0;
-		chiselObj.rotation.x = 8.0 * Math.PI / 180.0;
-		chiselObj.rotation.z = 3.0 * Math.PI / 180.0;
-	
+		//line
+		const lineMtl = new LineMaterial({
+			color: params.lineColor,
+			linewidth: params.lineWidth, // px
+			resolution: new THREE.Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
+		});
+		const lineGeometry = new LineGeometry();
+		const lineEndsPositionArray = [ -15.7, 2.5, -15.0, -15.7, -3.5, -15.0 ];
+		lineGeometry.setPositions(lineEndsPositionArray);
+		const lineObj = new Line2(lineGeometry, lineMtl);
+		scene.add(lineObj);
+		
 		//popup
-		//createPopupPlane();
-		//addPopup();
+		createPopupPlane();
+		addPopup();
 
 		renderer.render(scene, camera);
 		canvas.addEventListener('mousemove', onMouseMove, false);
@@ -99,11 +119,48 @@ class App {
 }
 
 function onMouseMove(e) {
-	
+	if (params.isChiselLocked) {
+		//get movement of the mouse in lock API
+		let movementX = e.movementX ||
+			e.mozMovementX ||
+			e.webkitMovementX ||
+			0;
+		let newAngle = shiftObj.rotation.y + movementX * objectsParams.chisel.rotationStep;
+		if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
+		{
+			shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
+		}
+	}
 }
 
 function onMouseDown() {
-	
+	if (!params.isSimulationActive) return;
+	if (params.isChiselLocked) {
+		//unlock
+		document.exitPointerLock = document.exitPointerLock ||
+			document.mozExitPointerLock ||
+			document.webkitExitPointerLock;
+		document.exitPointerLock();
+		params.isChiselLocked = false;
+		//check
+		if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
+		{
+			params.isSetChiselCorrect = true;
+		}
+		else
+			params.isSetChiselCorrect = false;
+		setTimeout(() => {
+				addPopup();
+			}, params.waitPopupTime);
+	}
+	else {
+		//lock
+		canvas.requestPointerLock = canvas.requestPointerLock ||
+			canvas.mozRequestPointerLock ||
+			canvas.webkitRequestPointerLock;
+		canvas.requestPointerLock();
+		params.isChiselLocked = true;
+	}
 }
 
 function animate() {
@@ -120,7 +177,7 @@ function createPopupPlane() {
 		transparent: true
 	});    
 	popupPlaneMesh = new THREE.Mesh(popupPlane, popupMaterial);
-	popupPlaneMesh.scale.set(0.105, 0.105, 0.105)
+	popupPlaneMesh.scale.set(0.035, 0.035, 0.035)
 	popupPlaneMesh.position.z = 10;
 }
 
@@ -131,19 +188,19 @@ function addPopup() {
 	document.getElementById('popupTitle').style.display = 'block';
 	document.getElementById('popupText').style.display = 'block';
 	popupBtn.style.display = 'block';
-	if (findMiddleParams.isSetNeedleCorrect === undefined) {
+	if (params.isSetChiselCorrect === undefined) {
 		document.getElementById('popupTitle').value = popupTexts.introTitle;
 		document.getElementById('popupText').value = popupTexts.introText;
 		return;
 	}
-	if (findMiddleParams.isSetNeedleCorrect) {
-		document.getElementById('popupTitle').value = popupTexts.correctPlacementTitle;
-		document.getElementById('popupText').value = popupTexts.correctPlacementText;
+	if (params.isSetChiselCorrect) {
+		document.getElementById('popupTitle').value = popupTexts.correctTitle;
+		document.getElementById('popupText').value = popupTexts.correctText;
 		return;
 	}
-	if (!findMiddleParams.isSetNeedleCorrect) {
-		document.getElementById('popupTitle').value = popupTexts.uncorrectPlacementTitle;
-		document.getElementById('popupText').value = popupTexts.uncorrectPlacementText;
+	if (!params.isSetChiselCorrect) {
+		document.getElementById('popupTitle').value = popupTexts.uncorrectTitle;
+		document.getElementById('popupText').value = popupTexts.uncorrectText;
 		return;
 	}
 }
@@ -155,7 +212,7 @@ function removePopup() {
 	document.getElementById('popupTitle').style.display = 'none';
 	document.getElementById('popupText').style.display = 'none';
 	popupBtn.style.display = 'none';
-	if(!findMiddleParams.isSetNeedleCorrect) {
+	if(!params.isSetChiselCorrect) {
 		onMouseDown();
 	}
 }
