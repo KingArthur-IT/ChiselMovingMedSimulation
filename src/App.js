@@ -41,7 +41,7 @@ let objectsParams = {
 		maxAngle: 208.0 * Math.PI / 180.0
 	},
 	circlePlane: {
-		pathSrc: '/assets/img/circle.png',
+		pathSrc: './assets/img/circle.png',
 		width: 20,
 		height: 20,
 		scale: 		new THREE.Vector3(0.1, 0.1, 0.1),
