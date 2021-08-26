@@ -5,7 +5,7 @@ import { Line2, LineGeometry, LineMaterial } from 'three-fatline';
 
 //scene
 let canvas, camera, scene, light, renderer,
-	chiselObj, shiftObj;
+	chiselObj, shiftObj, circlePlane;
 //popup
 let popupPlaneMesh,
 	popupBtn = document.getElementById('popupBtn'),
@@ -19,10 +19,8 @@ let params = {
 	isSimulationActive: false,
 	isChiselLocked: false,
 	isSetChiselCorrect: undefined,
-	lineWidth: 3,
-	lineColor: '#000000',
 	successChiselAngle: 194.5 * Math.PI / 180.0,
-	maxAngleOffset: 1.0 * Math.PI / 180.0,
+	maxAngleOffset: 1.5 * Math.PI / 180.0,
 	waitPopupTime: 1000
 };
 
@@ -35,12 +33,25 @@ let objectsParams = {
 		position: new THREE.Vector3(-16.5, -4.0, -18.0),
 		rotation: new THREE.Vector3(
 			8.0 * Math.PI / 180.0,
-			185.0 * Math.PI / 180.0,
+			194.5 * Math.PI / 180.0, //185
 			3.0 * Math.PI / 180.0),
 		rotationPointShift: -15.0,
 		rotationStep: 0.005,
 		minAngle: 182.0 * Math.PI / 180.0,
 		maxAngle: 208.0 * Math.PI / 180.0
+	},
+	circlePlane: {
+		pathSrc: '/assets/img/circle.png',
+		width: 20,
+		height: 20,
+		scale: 		new THREE.Vector3(0.1, 0.1, 0.1),
+		position: 	new THREE.Vector3(13.9, -3.4, 0.0),
+		rotationStep: 0.01
+	},
+	line: {
+		lineWidth: 3,
+		lineColor: '#000000',
+		lineEndsPositionArray: [ -15.7, 2.5, -15.0, -15.7, -3.5, -15.0 ]
 	}
 };
 
@@ -95,15 +106,27 @@ class App {
 
 		//line
 		const lineMtl = new LineMaterial({
-			color: params.lineColor,
-			linewidth: params.lineWidth, // px
+			color: objectsParams.line.lineColor,
+			linewidth: objectsParams.line.lineWidth, // px
 			resolution: new THREE.Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
 		});
 		const lineGeometry = new LineGeometry();
-		const lineEndsPositionArray = [ -15.7, 2.5, -15.0, -15.7, -3.5, -15.0 ];
-		lineGeometry.setPositions(lineEndsPositionArray);
+		lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 		const lineObj = new Line2(lineGeometry, lineMtl);
 		scene.add(lineObj);
+
+		//planeCircle
+		const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
+		loader = new THREE.TextureLoader();
+		const circleMaterial = new THREE.MeshBasicMaterial({
+			map: loader.load(objectsParams.circlePlane.pathSrc, function (texture) {
+				texture.minFilter = THREE.LinearFilter; }),
+			transparent: true
+		});    
+		circlePlane = new THREE.Mesh(circlePlaneGeom, circleMaterial);
+		circlePlane.scale.copy(objectsParams.circlePlane.scale);
+		circlePlane.position.copy(objectsParams.circlePlane.position);
+		scene.add(circlePlane);
 		
 		//popup
 		createPopupPlane();
@@ -129,6 +152,8 @@ function onMouseMove(e) {
 		if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
 		{
 			shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
+			let isLeftRight = shiftObj.rotation.y > params.successChiselAngle ? 1.0 : -1.0;
+			circlePlane.rotation.y += isLeftRight * movementX * objectsParams.circlePlane.rotationStep;
 		}
 	}
 }
