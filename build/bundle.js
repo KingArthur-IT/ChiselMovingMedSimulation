@@ -44274,7 +44274,7 @@
 		isChiselLocked: false,
 		isSetChiselCorrect: undefined,
 		successChiselAngle: 194.5 * Math.PI / 180.0,
-		maxAngleOffset: 1.5 * Math.PI / 180.0,
+		maxAngleOffset: 2.0 * Math.PI / 180.0,
 		waitPopupTime: 1000
 	};
 
@@ -44291,7 +44291,7 @@
 				3.0 * Math.PI / 180.0),
 			rotationPointShift: -15.0,
 			rotationStep: 0.005,
-			minAngle: 182.0 * Math.PI / 180.0,
+			minAngle: 180.0 * Math.PI / 180.0,
 			maxAngle: 208.0 * Math.PI / 180.0
 		},
 		circlePlane: {
@@ -44299,8 +44299,7 @@
 			width: 20,
 			height: 20,
 			scale: 		new Vector3(0.1, 0.1, 0.1),
-			position: 	new Vector3(13.9, -3.4, 0.0),
-			rotationStep: 0.01
+			position: 	new Vector3(13.9, -3.4, 0.0)
 		},
 		line: {
 			lineWidth: 3,
@@ -44402,12 +44401,13 @@
 				e.mozMovementX ||
 				e.webkitMovementX ||
 				0;
+			if (movementX > 3.0)
+				movementX = Math.sign(movementX) * 3.0;
 			let newAngle = shiftObj.rotation.y + movementX * objectsParams.chisel.rotationStep;
 			if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
 			{
 				shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
-				let isLeftRight = shiftObj.rotation.y > params.successChiselAngle ? 1.0 : -1.0;
-				circlePlane.rotation.y += isLeftRight * movementX * objectsParams.circlePlane.rotationStep;
+				circlePlane.rotation.y = Math.abs(objectsParams.chisel.rotation.y - shiftObj.rotation.y) * 2.0;
 			}
 		}
 	}
@@ -44425,6 +44425,7 @@
 			if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
 			{
 				params.isSetChiselCorrect = true;
+				shiftObj.rotation.y = params.successChiselAngle;
 			}
 			else
 				params.isSetChiselCorrect = false;
