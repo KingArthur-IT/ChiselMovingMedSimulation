@@ -37,7 +37,7 @@ let objectsParams = {
 			3.0 * Math.PI / 180.0),
 		rotationPointShift: -15.0,
 		rotationStep: 0.005,
-		minAngle: 180.0 * Math.PI / 180.0,
+		minAngle: 179.0 * Math.PI / 180.0,
 		maxAngle: 208.0 * Math.PI / 180.0
 	},
 	circlePlane: {
@@ -147,7 +147,7 @@ function onMouseMove(e) {
 			e.mozMovementX ||
 			e.webkitMovementX ||
 			0;
-		if (movementX > 3.0)
+		if (Math.abs(movementX) > 3.0)
 			movementX = Math.sign(movementX) * 3.0;
 		let newAngle = shiftObj.rotation.y + movementX * objectsParams.chisel.rotationStep;
 		if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
