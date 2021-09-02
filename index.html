@@ -11,27 +11,31 @@
         *{
             margin: 0;
             padding: 0;
+            font-family: Calibri,sans-serif;
         }
         #popupTitle{
-            left: 276px;
-            top: 127px;
-            font-size: 11px;
+            left: 256px;
+            top: 98px;
+            font-size: 14px;
             color: #fff;
             display: none;
+            font-family: Calibri,sans-serif;
         }
         #popupText{
-            left: 275px;
-            top: 155px;
-            font-size: 12px;
+            left: 240px;
+            top: 125px;
+            font-size: 16px;
             text-align: justify;
-            width: 290px;
+            width: 370px;
             resize: none;
             display: none;
         }
         #popupBtn{
+            appearance: none;
+            font-family: Calibri,sans-serif;
             position: absolute;
-            background-color: rgb(122, 122, 122);
-            border: 2px solid rgb(122, 122, 122);
+            background-color: #4D4D4D;
+            border: 2px solid #A9A9A9;
             transition: border 0.3s ease-in;
             cursor: pointer;
             color: #fff;
@@ -39,10 +43,14 @@
             border-radius: 5px;
             letter-spacing: .5px;
             left: 370px;
-            top: 265px;
-            font-size: 12px;
+            top: 282px;
+            font-size: 16px;
             width: 100px;
             display: none;
+        }
+        #popupBtn:hover{
+            background-color: #A9A9A9;
+            border: 2px solid #4D4D4D;
         }
         .interface-text{
             position: absolute;
@@ -50,6 +58,7 @@
             border: none;
             letter-spacing: .5px;
             outline: none;
+            color: #4D4D4D;
         }
     </style>
 </head>

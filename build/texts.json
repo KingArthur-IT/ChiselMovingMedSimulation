@@ -1,8 +1,8 @@
 popupData = `{
     "introTitle" : "Message", 
-    "introText" : "Click the OK button to grab the chisel and start moving it. ",
+    "introText" : "The Chisel has been docked at the midline marks. Click the OK button to grab the Chisel and pivot it to true orthogonal orientation. As the Chisel is pivoted, note the corresponding movement of the Chisel window in the lateral fluoroscopic image to the right. Proper orientation is confirmed when the Chisel window shows as a perfect circle (no parallax in either direction).",
     "correctTitle": "Message",
-    "correctText": "Good work!",
+    "correctText": "The Chisel is now properly oriented and can be tapped into the disc space to create the keel cuts.",
     "uncorrectTitle": "Message",
     "uncorrectText": " Incorrect, please try again."
 }`
