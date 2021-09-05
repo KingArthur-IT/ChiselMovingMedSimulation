@@ -52,8 +52,15 @@ let objectsParams = {
 		lineWidth: 2,
 		lineColor: '#0dff00',
 		lineEndsPositionArray: [ -15.2, 5.0, -15.0, -5.5, -8.0, 20.0 ]
-	}
+	},
 };
+
+let touchParams = {
+	objectLeftTopCorner: { x: 15, y: 400 },
+	objectRightBottomCorner: { x: 140, y: 450 },
+	mouseDown: { x: 0 },
+	limits: {min: 15, max: 440}
+}
 
 class App {
 	init() {
@@ -137,6 +144,10 @@ class App {
 		canvas.addEventListener('mousemove', onMouseMove, false);
 		canvas.addEventListener('mousedown', onMouseDown, false);
 		popupBtn.addEventListener('click', removePopup, false);
+		
+		canvas.addEventListener("touchstart",   touch_start_handler);
+    	canvas.addEventListener("touchmove",    touch_move_handler);    
+    	canvas.addEventListener("touchend",     touch_up_handler);
 
 		animate();
 	}
@@ -157,14 +168,17 @@ function onMouseMove(e) {
 			shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		}
-		//check for green success
-		scene.remove(lineObj);
-		circlePlane.material.color.setHex( 0xffffff );
-		if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
-		{
-			scene.add(lineObj);
-			circlePlane.material.color.setHex( params.successColor );
-		}
+		AlignmentSuccess();
+	}
+}
+
+function AlignmentSuccess() {
+	scene.remove(lineObj);
+	circlePlane.material.color.setHex( 0xffffff );
+	if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
+	{
+		scene.add(lineObj);
+		circlePlane.material.color.setHex( params.successColor );
 	}
 }
 
@@ -177,17 +191,7 @@ function onMouseDown() {
 			document.webkitExitPointerLock;
 		document.exitPointerLock();
 		params.isChiselLocked = false;
-		//check
-		if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
-		{
-			params.isSetChiselCorrect = true;
-			shiftObj.rotation.y = params.successChiselAngle;
-		}
-		else
-			params.isSetChiselCorrect = false;
-		setTimeout(() => {
-				addPopup();
-			}, params.waitPopupTime);
+		CheckSuccessPosition();
 	}
 	else {
 		//lock
@@ -197,6 +201,19 @@ function onMouseDown() {
 		canvas.requestPointerLock();
 		params.isChiselLocked = true;
 	}
+}
+
+function CheckSuccessPosition(){
+	if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
+	{
+		params.isSetChiselCorrect = true;
+		shiftObj.rotation.y = params.successChiselAngle;
+	}
+	else
+		params.isSetChiselCorrect = false;
+	setTimeout(() => {
+			addPopup();
+		}, params.waitPopupTime);
 }
 
 function animate() {
@@ -256,6 +273,46 @@ function removePopup() {
 	popupBtn.style.display = 'none';
 	if(!params.isSetChiselCorrect) {
 		onMouseDown();
+	}
+}
+
+function touch_start_handler(e) {
+	let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+    let touch = evt.touches[0] || evt.changedTouches[0];
+	if (parseInt(touch.pageX) > touchParams.objectLeftTopCorner.x &&
+		parseInt(touch.pageY) > touchParams.objectLeftTopCorner.y &&
+		parseInt(touch.pageX) < touchParams.objectRightBottomCorner.x &&
+		parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
+	) {
+		params.isChiselLocked = true;
+		touchParams.mouseDown.x = parseInt(touch.pageX);
+	}
+}
+
+function touch_move_handler(e) {
+	let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+	let touch = evt.touches[0] || evt.changedTouches[0];
+	if (params.isChiselLocked) {
+		let newMouseX = parseInt(touch.pageX);
+		if (newMouseX < touchParams.limits.max && newMouseX > touchParams.limits.min) {
+			let newAngle = (newMouseX - touchParams.limits.min) *
+				(objectsParams.chisel.maxAngle - objectsParams.chisel.minAngle) /
+				(touchParams.limits.max - touchParams.limits.min) + objectsParams.chisel.minAngle;
+			shiftObj.rotation.y = newAngle;
+			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+			touchParams.objectLeftTopCorner.x = newMouseX - 50;
+			touchParams.objectRightBottomCorner.x = newMouseX + 50;
+			AlignmentSuccess();
+		}
+	}
+}
+
+function touch_up_handler(e) {
+	params.isChiselLocked = false;
+	if (touchParams.mouseDown.x != 0) {
+		touchParams.mouseDown.x = 0;
+		params.isChiselLocked = false;
+		CheckSuccessPosition();
 	}
 }
 

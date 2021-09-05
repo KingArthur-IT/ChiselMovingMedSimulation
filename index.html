@@ -1,77 +1,89 @@
 <!DOCTYPE html>
 <html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Language" content="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
     <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Center Chisel</title>
     <style>
-        *{
-            margin: 0;
-            padding: 0;
-            font-family: Calibri,sans-serif;
-        }
-        #popupTitle{
-            left: 256px;
-            top: 98px;
-            font-size: 14px;
-            color: #fff;
-            display: none;
-            font-family: Calibri,sans-serif;
-        }
-        #popupText{
-            left: 240px;
-            top: 125px;
-            font-size: 16px;
-            text-align: justify;
-            width: 370px;
-            resize: none;
-            display: none;
-        }
-        #popupBtn{
-            appearance: none;
-            font-family: Calibri,sans-serif;
-            position: absolute;
-            background-color: #4D4D4D;
-            border: 2px solid #A9A9A9;
-            transition: border 0.3s ease-in;
-            cursor: pointer;
-            color: #fff;
-            padding: 2px;
-            border-radius: 5px;
-            letter-spacing: .5px;
-            left: 370px;
-            top: 282px;
-            font-size: 16px;
-            width: 100px;
-            display: none;
-        }
-        #popupBtn:hover{
-            background-color: #A9A9A9;
-            border: 2px solid #4D4D4D;
-        }
-        .interface-text{
-            position: absolute;
-            background-color: transparent;
-            border: none;
-            letter-spacing: .5px;
-            outline: none;
-            color: #4D4D4D;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: Calibri, sans-serif;
+      }
+      #popupTitle {
+        left: 256px;
+        top: 98px;
+        font-size: 14px;
+        color: #fff;
+        display: none;
+        font-family: Calibri, sans-serif;
+      }
+      #popupText {
+        left: 240px;
+        top: 122px;
+        font-size: 16px;
+        text-align: justify;
+        width: 370px;
+        resize: none;
+        display: none;
+      }
+      #popupBtn {
+        appearance: none;
+        font-family: Calibri, sans-serif;
+        position: absolute;
+        background-color: #4d4d4d;
+        border: 2px solid #a9a9a9;
+        transition: border 0.3s ease-in;
+        cursor: pointer;
+        color: #fff;
+        padding: 2px;
+        border-radius: 5px;
+        letter-spacing: 0.5px;
+        left: 370px;
+        top: 283px;
+        font-size: 16px;
+        width: 100px;
+        display: none;
+      }
+      #popupBtn:hover {
+        background-color: #a9a9a9;
+        border: 2px solid #4d4d4d;
+      }
+      .interface-text {
+        position: absolute;
+        background-color: transparent;
+        border: none;
+        letter-spacing: 0.5px;
+        outline: none;
+        color: #4d4d4d;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <canvas id="canvas"></canvas>
     <!--popup-->
-    <input type="text" id="popupTitle" value="Message" class="interface-text" readonly />
-    <textarea id="popupText" cols="30" rows="10" class="interface-text" readonly>
+    <input
+      type="text"
+      id="popupTitle"
+      value="Message"
+      class="interface-text"
+      readonly
+    />
+    <textarea
+      id="popupText"
+      cols="30"
+      rows="10"
+      class="interface-text"
+      readonly
+    >
     </textarea>
     <input type="button" id="popupBtn" value="Ok" />
     <!--JSON-->
     <script src="./build/texts.json"></script>
     <!--Main Script-->
     <script src="./build/bundle.js"></script>
-</body>
+  </body>
 </html>
