@@ -44539,7 +44539,6 @@
 			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
 		) {
 			params.isChiselLocked = true;
-			touchParams.mouseDown.x = parseInt(touch.pageX);
 		}
 	}
 
@@ -44562,12 +44561,10 @@
 	}
 
 	function touch_up_handler(e) {
-		params.isChiselLocked = false;
-		if (touchParams.mouseDown.x != 0) {
-			touchParams.mouseDown.x = 0;
-			params.isChiselLocked = false;
+		if (params.isChiselLocked) {
 			CheckSuccessPosition();
 		}
+		params.isChiselLocked = false;
 	}
 
 	const app = new App();
