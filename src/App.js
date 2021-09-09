@@ -20,7 +20,7 @@ let params = {
 	isChiselLocked: false,
 	isSetChiselCorrect: undefined,
 	successChiselAngle: 195.0 * Math.PI / 180.0,
-	maxAngleOffset: 1.5 * Math.PI / 180.0,
+	maxAngleOffset: 0.75 * Math.PI / 180.0,
 	waitPopupTime: 1000,
 	successColor: 0x0dff00
 }
@@ -178,7 +178,8 @@ function AlignmentSuccess() {
 	if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
 	{
 		scene.add(lineObj);
-		circlePlane.material.color.setHex( params.successColor );
+		circlePlane.material.color.setHex(params.successColor);
+		shiftObj.rotation.y = params.successChiselAngle;
 	}
 }
 
