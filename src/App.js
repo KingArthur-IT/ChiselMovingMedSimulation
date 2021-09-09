@@ -122,7 +122,7 @@ class App {
 		const lineGeometry = new LineGeometry();
 		lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 		lineObj = new Line2(lineGeometry, lineMtl);
-
+*/
 		//planeCircle
 		const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
 		loader = new THREE.TextureLoader();
@@ -141,7 +141,7 @@ class App {
 		//popup
 		createPopupPlane();
 		addPopup();
-		*/
+		
 		renderer.render(scene, camera);
 		canvas.addEventListener('mousemove', onMouseMove, false);
 		canvas.addEventListener('mousedown', onMouseDown, false);
@@ -286,7 +286,8 @@ function touch_start_handler(e) {
 	if (parseInt(touch.pageX) > touchParams.objectLeftTopCorner.x &&
 		parseInt(touch.pageY) > touchParams.objectLeftTopCorner.y &&
 		parseInt(touch.pageX) < touchParams.objectRightBottomCorner.x &&
-		parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
+		parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y &&
+		params.isChiselLocked
 	) {
 		params.isChiselLocked = true;
 	}

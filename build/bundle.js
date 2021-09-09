@@ -44376,17 +44376,17 @@
 			const lineGeometry = new LineGeometry();
 			lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 			lineObj = new Line2(lineGeometry, lineMtl);
-
+	*/
 			//planeCircle
-			const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
-			loader = new THREE.TextureLoader();
-			const circleMaterial = new THREE.MeshBasicMaterial({
+			const circlePlaneGeom = new PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
+			loader = new TextureLoader();
+			const circleMaterial = new MeshBasicMaterial({
 				map: loader.load(objectsParams.circlePlane.pathSrc, function (texture) {
-					texture.minFilter = THREE.LinearFilter;
+					texture.minFilter = LinearFilter;
 				}),
 				transparent: true
 			});
-			circlePlane = new THREE.Mesh(circlePlaneGeom, circleMaterial);
+			circlePlane = new Mesh(circlePlaneGeom, circleMaterial);
 			circlePlane.scale.copy(objectsParams.circlePlane.scale);
 			circlePlane.position.copy(objectsParams.circlePlane.position);
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
@@ -44395,7 +44395,7 @@
 			//popup
 			createPopupPlane();
 			addPopup();
-			*/
+			
 			renderer.render(scene, camera);
 			canvas.addEventListener('mousemove', onMouseMove, false);
 			canvas.addEventListener('mousedown', onMouseDown, false);
@@ -44478,6 +44478,19 @@
 		renderer.render(scene, camera);
 	}
 
+	function createPopupPlane() {
+		const popupPlane = new PlaneGeometry(params.sceneWidth, params.sceneHeight, 10.0);
+		const loader = new TextureLoader();
+		const popupMaterial = new MeshBasicMaterial({
+			map: loader.load(params.popupSrc, function (texture) {
+				texture.minFilter = LinearFilter; }),
+			transparent: true
+		});    
+		popupPlaneMesh = new Mesh(popupPlane, popupMaterial);
+		popupPlaneMesh.scale.set(0.04, 0.045, 0.04);
+		popupPlaneMesh.position.z = 10;
+	}
+
 	function addPopup() {
 		scene.add(popupPlaneMesh);
 		//unlock
@@ -44527,7 +44540,8 @@
 		if (parseInt(touch.pageX) > touchParams.objectLeftTopCorner.x &&
 			parseInt(touch.pageY) > touchParams.objectLeftTopCorner.y &&
 			parseInt(touch.pageX) < touchParams.objectRightBottomCorner.x &&
-			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
+			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y &&
+			params.isChiselLocked
 		) {
 			params.isChiselLocked = true;
 		}
