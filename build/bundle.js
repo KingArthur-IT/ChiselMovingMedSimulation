@@ -44392,10 +44392,11 @@
 			circlePlane.position.copy(objectsParams.circlePlane.position);
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			scene.add(circlePlane);
-			*/
+			
 			//popup
 			createPopupPlane();
 			addPopup();
+			*/
 
 			renderer.render(scene, camera);
 			canvas.addEventListener('mousemove', onMouseMove, false);
@@ -44477,19 +44478,6 @@
 	function animate() {
 		requestAnimationFrame(animate);
 		renderer.render(scene, camera);
-	}
-
-	function createPopupPlane() {
-		const popupPlane = new PlaneGeometry(params.sceneWidth, params.sceneHeight, 10.0);
-		const loader = new TextureLoader();
-		const popupMaterial = new MeshBasicMaterial({
-			map: loader.load(params.popupSrc, function (texture) {
-				texture.minFilter = LinearFilter; }),
-			transparent: true
-		});    
-		popupPlaneMesh = new Mesh(popupPlane, popupMaterial);
-		popupPlaneMesh.scale.set(0.04, 0.045, 0.04);
-		popupPlaneMesh.position.z = 10;
 	}
 
 	function addPopup() {
