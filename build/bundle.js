@@ -44276,7 +44276,8 @@
 		successChiselAngle: 195.0 * Math.PI / 180.0,
 		maxAngleOffset: 0.75 * Math.PI / 180.0,
 		waitPopupTime: 1000,
-		successColor: 0x0dff00
+		successColor: 0x0dff00,
+		isSensor: false
 	};
 
 	let objectsParams = {
@@ -44495,12 +44496,12 @@
 	function addPopup() {
 		scene.add(popupPlaneMesh);
 		//unlock
-		/*
-		document.exitPointerLock = document.exitPointerLock ||
-			document.mozExitPointerLock ||
-			document.webkitExitPointerLock;
-		document.exitPointerLock();
-		*/
+		if (!params.isSensor) {
+			document.exitPointerLock = document.exitPointerLock ||
+				document.mozExitPointerLock ||
+				document.webkitExitPointerLock;
+			document.exitPointerLock();
+		}
 		params.isChiselLocked = false;
 		params.isSimulationActive = false;
 		//interface
@@ -44537,6 +44538,7 @@
 	}
 
 	function touch_start_handler(e) {
+		params.isSensor = true;
 		if (!params.isSimulationActive) return;
 		params.isChiselLocked = false;
 		let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
