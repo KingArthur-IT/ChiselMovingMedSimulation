@@ -169,7 +169,7 @@ function onMouseMove(e) {
 		if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
 		{
 			shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
-			//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		}
 		AlignmentSuccess();
 	}
@@ -177,11 +177,11 @@ function onMouseMove(e) {
 
 function AlignmentSuccess() {
 	scene.remove(lineObj);
-	//circlePlane.material.color.setHex( 0xffffff );
+	circlePlane.material.color.setHex( 0xffffff );
 	if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
 	{
 		scene.add(lineObj);
-		//circlePlane.material.color.setHex(params.successColor);
+		circlePlane.material.color.setHex(params.successColor);
 		shiftObj.rotation.y = params.successChiselAngle;
 	}
 }
@@ -300,7 +300,7 @@ function touch_move_handler(e) {
 				(objectsParams.chisel.maxAngle - objectsParams.chisel.minAngle) /
 				(touchParams.limits.max - touchParams.limits.min) + objectsParams.chisel.minAngle;
 			shiftObj.rotation.y = newAngle;
-			//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			touchParams.objectLeftTopCorner.x = newMouseX - 50;
 			touchParams.objectRightBottomCorner.x = newMouseX + 50;
 			AlignmentSuccess();
