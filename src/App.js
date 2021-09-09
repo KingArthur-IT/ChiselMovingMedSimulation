@@ -123,7 +123,6 @@ class App {
 		lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 		lineObj = new Line2(lineGeometry, lineMtl);
 
-		/*
 		//planeCircle
 		const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
 		loader = new THREE.TextureLoader();
@@ -138,7 +137,7 @@ class App {
 		circlePlane.position.copy(objectsParams.circlePlane.position);
 		circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		scene.add(circlePlane);
-		
+		/*		
 		//popup
 		createPopupPlane();
 		addPopup();

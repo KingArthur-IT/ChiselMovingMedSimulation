@@ -44259,7 +44259,7 @@
 
 	//scene
 	let canvas, camera, scene, light, renderer,
-		chiselObj, shiftObj, lineObj;
+		chiselObj, shiftObj, circlePlane, lineObj;
 	//popup
 	let popupPlaneMesh,
 		popupBtn = document.getElementById('popupBtn'),
@@ -44377,22 +44377,21 @@
 			lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 			lineObj = new Line2(lineGeometry, lineMtl);
 
-			/*
 			//planeCircle
-			const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
-			loader = new THREE.TextureLoader();
-			const circleMaterial = new THREE.MeshBasicMaterial({
+			const circlePlaneGeom = new PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
+			loader = new TextureLoader();
+			const circleMaterial = new MeshBasicMaterial({
 				map: loader.load(objectsParams.circlePlane.pathSrc, function (texture) {
-					texture.minFilter = THREE.LinearFilter;
+					texture.minFilter = LinearFilter;
 				}),
 				transparent: true
 			});
-			circlePlane = new THREE.Mesh(circlePlaneGeom, circleMaterial);
+			circlePlane = new Mesh(circlePlaneGeom, circleMaterial);
 			circlePlane.scale.copy(objectsParams.circlePlane.scale);
 			circlePlane.position.copy(objectsParams.circlePlane.position);
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			scene.add(circlePlane);
-			
+			/*		
 			//popup
 			createPopupPlane();
 			addPopup();
