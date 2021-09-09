@@ -70,6 +70,7 @@ class App {
 		
 		//scene and camera
 		scene = new THREE.Scene();
+		scene.background = new THREE.Color(0x00ffff);
 		camera = new THREE.PerspectiveCamera(40.0, params.sceneWidth / params.sceneHeight, 0.1, 5000);
 		camera.position.set(0, 0, 40);
 		//light
@@ -80,6 +81,7 @@ class App {
 		renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 		renderer.setClearColor(0xffffff);
 
+		
 		//Load background texture
 		let loader = new THREE.TextureLoader();
 		loader.load(params.bgSrc, function (texture) {
@@ -110,7 +112,7 @@ class App {
 		shiftObj.add(chiselObj);
 		scene.add(shiftObj);
 		chiselObj.position.z = objectsParams.chisel.rotationPointShift;
-
+/*
 		//line
 		const lineMtl = new LineMaterial({
 			color: objectsParams.line.lineColor,
@@ -139,7 +141,7 @@ class App {
 		//popup
 		createPopupPlane();
 		addPopup();
-
+		*/
 		renderer.render(scene, camera);
 		canvas.addEventListener('mousemove', onMouseMove, false);
 		canvas.addEventListener('mousedown', onMouseDown, false);

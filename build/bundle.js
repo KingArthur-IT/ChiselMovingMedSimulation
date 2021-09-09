@@ -44324,6 +44324,7 @@
 			
 			//scene and camera
 			scene = new Scene();
+			scene.background = new Color(0x00ffff);
 			camera = new PerspectiveCamera(40.0, params.sceneWidth / params.sceneHeight, 0.1, 5000);
 			camera.position.set(0, 0, 40);
 			//light
@@ -44334,6 +44335,7 @@
 			renderer = new WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
 			renderer.setClearColor(0xffffff);
 
+			
 			//Load background texture
 			let loader = new TextureLoader();
 			loader.load(params.bgSrc, function (texture) {
@@ -44364,27 +44366,27 @@
 			shiftObj.add(chiselObj);
 			scene.add(shiftObj);
 			chiselObj.position.z = objectsParams.chisel.rotationPointShift;
-
+	/*
 			//line
 			const lineMtl = new LineMaterial({
 				color: objectsParams.line.lineColor,
 				linewidth: objectsParams.line.lineWidth, // px
-				resolution: new Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
+				resolution: new THREE.Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
 			});
 			const lineGeometry = new LineGeometry();
 			lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 			lineObj = new Line2(lineGeometry, lineMtl);
 
 			//planeCircle
-			const circlePlaneGeom = new PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
-			loader = new TextureLoader();
-			const circleMaterial = new MeshBasicMaterial({
+			const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
+			loader = new THREE.TextureLoader();
+			const circleMaterial = new THREE.MeshBasicMaterial({
 				map: loader.load(objectsParams.circlePlane.pathSrc, function (texture) {
-					texture.minFilter = LinearFilter;
+					texture.minFilter = THREE.LinearFilter;
 				}),
 				transparent: true
 			});
-			circlePlane = new Mesh(circlePlaneGeom, circleMaterial);
+			circlePlane = new THREE.Mesh(circlePlaneGeom, circleMaterial);
 			circlePlane.scale.copy(objectsParams.circlePlane.scale);
 			circlePlane.position.copy(objectsParams.circlePlane.position);
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
@@ -44393,7 +44395,7 @@
 			//popup
 			createPopupPlane();
 			addPopup();
-
+			*/
 			renderer.render(scene, camera);
 			canvas.addEventListener('mousemove', onMouseMove, false);
 			canvas.addEventListener('mousedown', onMouseDown, false);
@@ -44474,19 +44476,6 @@
 	function animate() {
 		requestAnimationFrame(animate);
 		renderer.render(scene, camera);
-	}
-
-	function createPopupPlane() {
-		const popupPlane = new PlaneGeometry(params.sceneWidth, params.sceneHeight, 10.0);
-		const loader = new TextureLoader();
-		const popupMaterial = new MeshBasicMaterial({
-			map: loader.load(params.popupSrc, function (texture) {
-				texture.minFilter = LinearFilter; }),
-			transparent: true
-		});    
-		popupPlaneMesh = new Mesh(popupPlane, popupMaterial);
-		popupPlaneMesh.scale.set(0.04, 0.045, 0.04);
-		popupPlaneMesh.position.z = 10;
 	}
 
 	function addPopup() {
