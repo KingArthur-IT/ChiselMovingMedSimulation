@@ -70,7 +70,7 @@ class App {
 		
 		//scene and camera
 		scene = new THREE.Scene();
-		scene.background = new THREE.Color(0x00ffff);
+		scene.background = new THREE.Color(0xffffff);
 		camera = new THREE.PerspectiveCamera(40.0, params.sceneWidth / params.sceneHeight, 0.1, 5000);
 		camera.position.set(0, 0, 40);
 		//light
@@ -112,7 +112,7 @@ class App {
 		shiftObj.add(chiselObj);
 		scene.add(shiftObj);
 		chiselObj.position.z = objectsParams.chisel.rotationPointShift;
-/*
+
 		//line
 		const lineMtl = new LineMaterial({
 			color: objectsParams.line.lineColor,
@@ -122,7 +122,8 @@ class App {
 		const lineGeometry = new LineGeometry();
 		lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 		lineObj = new Line2(lineGeometry, lineMtl);
-*/
+
+		/*
 		//planeCircle
 		const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
 		loader = new THREE.TextureLoader();
@@ -137,11 +138,11 @@ class App {
 		circlePlane.position.copy(objectsParams.circlePlane.position);
 		circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		scene.add(circlePlane);
-		
+		*/
 		//popup
 		createPopupPlane();
 		addPopup();
-		
+
 		renderer.render(scene, camera);
 		canvas.addEventListener('mousemove', onMouseMove, false);
 		canvas.addEventListener('mousedown', onMouseDown, false);
@@ -168,7 +169,7 @@ function onMouseMove(e) {
 		if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
 		{
 			shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
-			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+			//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		}
 		AlignmentSuccess();
 	}
@@ -176,11 +177,11 @@ function onMouseMove(e) {
 
 function AlignmentSuccess() {
 	scene.remove(lineObj);
-	circlePlane.material.color.setHex( 0xffffff );
+	//circlePlane.material.color.setHex( 0xffffff );
 	if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
 	{
 		scene.add(lineObj);
-		circlePlane.material.color.setHex(params.successColor);
+		//circlePlane.material.color.setHex(params.successColor);
 		shiftObj.rotation.y = params.successChiselAngle;
 	}
 }
@@ -280,14 +281,14 @@ function removePopup() {
 }
 
 function touch_start_handler(e) {
+	if (!params.isSimulationActive) return;
 	params.isChiselLocked = false;
 	let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
 	let touch = evt.touches[0] || evt.changedTouches[0];
 	if (parseInt(touch.pageX) > touchParams.objectLeftTopCorner.x &&
 		parseInt(touch.pageY) > touchParams.objectLeftTopCorner.y &&
 		parseInt(touch.pageX) < touchParams.objectRightBottomCorner.x &&
-		parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y &&
-		params.isChiselLocked
+		parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
 	) {
 		params.isChiselLocked = true;
 	}
@@ -303,7 +304,7 @@ function touch_move_handler(e) {
 				(objectsParams.chisel.maxAngle - objectsParams.chisel.minAngle) /
 				(touchParams.limits.max - touchParams.limits.min) + objectsParams.chisel.minAngle;
 			shiftObj.rotation.y = newAngle;
-			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+			//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			touchParams.objectLeftTopCorner.x = newMouseX - 50;
 			touchParams.objectRightBottomCorner.x = newMouseX + 50;
 			AlignmentSuccess();

@@ -44259,7 +44259,7 @@
 
 	//scene
 	let canvas, camera, scene, light, renderer,
-		chiselObj, shiftObj, circlePlane, lineObj;
+		chiselObj, shiftObj, lineObj;
 	//popup
 	let popupPlaneMesh,
 		popupBtn = document.getElementById('popupBtn'),
@@ -44324,7 +44324,7 @@
 			
 			//scene and camera
 			scene = new Scene();
-			scene.background = new Color(0x00ffff);
+			scene.background = new Color(0xffffff);
 			camera = new PerspectiveCamera(40.0, params.sceneWidth / params.sceneHeight, 0.1, 5000);
 			camera.position.set(0, 0, 40);
 			//light
@@ -44366,36 +44366,37 @@
 			shiftObj.add(chiselObj);
 			scene.add(shiftObj);
 			chiselObj.position.z = objectsParams.chisel.rotationPointShift;
-	/*
+
 			//line
 			const lineMtl = new LineMaterial({
 				color: objectsParams.line.lineColor,
 				linewidth: objectsParams.line.lineWidth, // px
-				resolution: new THREE.Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
+				resolution: new Vector2(params.sceneWidth, params.sceneHeight) // resolution of the viewport
 			});
 			const lineGeometry = new LineGeometry();
 			lineGeometry.setPositions(objectsParams.line.lineEndsPositionArray);
 			lineObj = new Line2(lineGeometry, lineMtl);
-	*/
+
+			/*
 			//planeCircle
-			const circlePlaneGeom = new PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
-			loader = new TextureLoader();
-			const circleMaterial = new MeshBasicMaterial({
+			const circlePlaneGeom = new THREE.PlaneGeometry(objectsParams.circlePlane.width, objectsParams.circlePlane.height, 10.0);
+			loader = new THREE.TextureLoader();
+			const circleMaterial = new THREE.MeshBasicMaterial({
 				map: loader.load(objectsParams.circlePlane.pathSrc, function (texture) {
-					texture.minFilter = LinearFilter;
+					texture.minFilter = THREE.LinearFilter;
 				}),
 				transparent: true
 			});
-			circlePlane = new Mesh(circlePlaneGeom, circleMaterial);
+			circlePlane = new THREE.Mesh(circlePlaneGeom, circleMaterial);
 			circlePlane.scale.copy(objectsParams.circlePlane.scale);
 			circlePlane.position.copy(objectsParams.circlePlane.position);
 			circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			scene.add(circlePlane);
-			
+			*/
 			//popup
 			createPopupPlane();
 			addPopup();
-			
+
 			renderer.render(scene, camera);
 			canvas.addEventListener('mousemove', onMouseMove, false);
 			canvas.addEventListener('mousedown', onMouseDown, false);
@@ -44422,7 +44423,7 @@
 			if (newAngle < objectsParams.chisel.maxAngle && newAngle > objectsParams.chisel.minAngle)
 			{
 				shiftObj.rotation.y += movementX * objectsParams.chisel.rotationStep;
-				circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+				//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 			}
 			AlignmentSuccess();
 		}
@@ -44430,11 +44431,11 @@
 
 	function AlignmentSuccess() {
 		scene.remove(lineObj);
-		circlePlane.material.color.setHex( 0xffffff );
+		//circlePlane.material.color.setHex( 0xffffff );
 		if (Math.abs(shiftObj.rotation.y - params.successChiselAngle) < params.maxAngleOffset)
 		{
 			scene.add(lineObj);
-			circlePlane.material.color.setHex(params.successColor);
+			//circlePlane.material.color.setHex(params.successColor);
 			shiftObj.rotation.y = params.successChiselAngle;
 		}
 	}
@@ -44534,14 +44535,14 @@
 	}
 
 	function touch_start_handler(e) {
+		if (!params.isSimulationActive) return;
 		params.isChiselLocked = false;
 		let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
 		let touch = evt.touches[0] || evt.changedTouches[0];
 		if (parseInt(touch.pageX) > touchParams.objectLeftTopCorner.x &&
 			parseInt(touch.pageY) > touchParams.objectLeftTopCorner.y &&
 			parseInt(touch.pageX) < touchParams.objectRightBottomCorner.x &&
-			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y &&
-			params.isChiselLocked
+			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
 		) {
 			params.isChiselLocked = true;
 		}
@@ -44557,7 +44558,7 @@
 					(objectsParams.chisel.maxAngle - objectsParams.chisel.minAngle) /
 					(touchParams.limits.max - touchParams.limits.min) + objectsParams.chisel.minAngle;
 				shiftObj.rotation.y = newAngle;
-				circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
+				//circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 				touchParams.objectLeftTopCorner.x = newMouseX - 50;
 				touchParams.objectRightBottomCorner.x = newMouseX + 50;
 				AlignmentSuccess();
