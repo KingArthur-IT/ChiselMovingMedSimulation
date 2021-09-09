@@ -44394,7 +44394,7 @@
 				
 			//popup
 			createPopupPlane();
-			//addPopup();
+			addPopup();
 
 
 			renderer.render(scene, camera);
@@ -44495,10 +44495,12 @@
 	function addPopup() {
 		scene.add(popupPlaneMesh);
 		//unlock
+		/*
 		document.exitPointerLock = document.exitPointerLock ||
 			document.mozExitPointerLock ||
 			document.webkitExitPointerLock;
 		document.exitPointerLock();
+		*/
 		params.isChiselLocked = false;
 		params.isSimulationActive = false;
 		//interface
