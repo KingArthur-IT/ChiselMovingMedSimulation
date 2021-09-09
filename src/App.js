@@ -137,11 +137,11 @@ class App {
 		circlePlane.position.copy(objectsParams.circlePlane.position);
 		circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
 		scene.add(circlePlane);
-		/*		
+			
 		//popup
 		createPopupPlane();
-		addPopup();
-		*/
+		//addPopup();
+
 
 		renderer.render(scene, camera);
 		canvas.addEventListener('mousemove', onMouseMove, false);
