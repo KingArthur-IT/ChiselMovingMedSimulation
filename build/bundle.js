@@ -44284,8 +44284,8 @@
 		chisel: {
 			chiselObj: 'chisel.obj',
 			chiselMtl: 'chisel.mtl',
-			scale: new Vector3(1.0, 1.0, 1.3),
-			position: new Vector3(-16.0, -4.0, -18.0),
+			scale: new Vector3(1.3, 1.3, 1.3),
+			position: new Vector3(-16.0, -1.5, -18.0),
 			rotation: new Vector3(
 				8.0 * Math.PI / 180.0,
 				185.0 * Math.PI / 180.0, //185
@@ -44305,15 +44305,15 @@
 		line: {
 			lineWidth: 2,
 			lineColor: '#0dff00',
-			lineEndsPositionArray: [ -15.2, 5.0, -15.0, -5.5, -8.0, 20.0 ]
+			lineEndsPositionArray: [ -15.2, 5.0, -15.0, -1.4, -8.0, 35.0 ]
 		},
 	};
 
 	let touchParams = {
-		objectLeftTopCorner: { x: 15, y: 400 },
-		objectRightBottomCorner: { x: 140, y: 450 },
+		objectLeftTopCorner: { x: 20, y: 340 },
+		objectRightBottomCorner: { x: 150, y: 450 },
 		mouseDown: { x: 0 },
-		limits: {min: 15, max: 440}
+		limits: {min: 0, max: 480}
 	};
 
 	class App {
@@ -44488,8 +44488,8 @@
 			transparent: true
 		});    
 		popupPlaneMesh = new Mesh(popupPlane, popupMaterial);
-		popupPlaneMesh.scale.set(0.04, 0.045, 0.04);
-		popupPlaneMesh.position.z = 10;
+		popupPlaneMesh.scale.set(0.021, 0.025, 0.04);
+		popupPlaneMesh.position.z = 25;
 	}
 
 	function addPopup() {
@@ -44541,6 +44541,7 @@
 			parseInt(touch.pageY) < touchParams.objectRightBottomCorner.y
 		) {
 			params.isChiselLocked = true;
+			touchParams.mouseDown.x = touch.pageX;
 		}
 	}
 
@@ -44555,16 +44556,18 @@
 					(touchParams.limits.max - touchParams.limits.min) + objectsParams.chisel.minAngle;
 				shiftObj.rotation.y = newAngle;
 				circlePlane.rotation.y = Math.abs(params.successChiselAngle - shiftObj.rotation.y) * 2.0;
-				touchParams.objectLeftTopCorner.x = newMouseX - 50;
-				touchParams.objectRightBottomCorner.x = newMouseX + 50;
 				AlignmentSuccess();
 			}
 		}
 	}
 
 	function touch_up_handler(e) {
+		let evt = (typeof e.originalEvent === 'undefined') ? e : e.originalEvent;
+		let touch = evt.touches[0] || evt.changedTouches[0];
 		if (params.isChiselLocked) {
 			CheckSuccessPosition();
+			touchParams.objectLeftTopCorner.x += touch.pageX - touchParams.mouseDown.x;
+			touchParams.objectRightBottomCorner.x += touch.pageX - touchParams.mouseDown.x;
 		}
 		params.isChiselLocked = false;
 	}
